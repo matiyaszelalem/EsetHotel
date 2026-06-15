@@ -1,0 +1,255 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   UI STARTER — globals.css
+   This file is the single source of truth for the design system's "feel":
+   colors, fonts, and a small set of reusable component classes.
+
+   TO REBRAND FOR A NEW PROJECT:
+   1. Edit the HSL values in :root below (especially --primary, --primary-dark,
+      --primary-light, and --background/--foreground if you want a different
+      base palette).
+   2. Swap the font families loaded in app/layout.tsx and update the
+      `--font-*` variable names if needed.
+   That's it — every component and utility class derives from these.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────
+   @layer base — design tokens + base resets
+   ───────────────────────────────────────────────────────────────────────── */
+@layer base {
+
+  :root {
+    /* ─── Surfaces & text (Now crisp, bright, and premium) ─── */
+    --background: 0 0% 100%;         /* Shifted to pure white to maximize breathing room */
+    --foreground: 171 91% 8%;        /* #022923 - Your deep brand green acts as the premium text color */
+
+    --card: 160 5% 96%;              /* #F0F0F0 - Your light gray now beautifully frames content cards */
+    --card-foreground: 171 91% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 171 91% 8%;
+
+    --secondary: 167 33% 95%;        /* An ultra-soft mint-tinted gray for secondary elements */
+    --secondary-foreground: 167 33% 27%;
+
+    --muted: 167 20% 93%;            /* Soft, clean divider tone */
+    --muted-foreground: 167 15% 40%;
+
+    --subtle-foreground: 167 10% 55%;
+
+    --border: 167 15% 90%;           
+    --input: 167 15% 90%;
+    --radius: 0.65rem;
+
+    /* ─── Brand Accents (Promoted the lighter green to main Primary) ─── */
+    --primary: 167 33% 27%;          /* #2E5B51 - The lighter green you love is now the star of the show */
+    --primary-foreground: 0 0% 100%; /* Keeps crisp white text contrast on buttons */
+    --primary-dark: 167 35% 20%;     /* Richer, deeper green strictly reserved for button hover states */
+    --primary-light: 167 30% 93%;    /* An ultra-light, refreshing mint for subtle accents/background highlights */
+    --ring: 167 33% 27%;
+
+    --accent: 167 33% 27%;
+    --accent-foreground: 0 0% 100%;
+
+    /* ─── Status colors ─── */
+    --destructive: 0 75% 59%;        
+    --destructive-foreground: 0 0% 98%;
+    --success: 71 80% 50%;           /* #BFE619 - Your lime green pops perfectly against the clean white/gray layout */
+    --warning: 39 100% 45%;          
+    --info: 215 86% 57%;             
+
+    /* ─── Dark "ink" surfaces ─── */
+    --ink: 171 91% 8%;               /* #022923 - Deepest brand green */
+    --ink-soft: 171 70% 12%;
+    --ink-card: 171 50% 15%;          
+    --ink-border: 171 40% 22%;
+  }
+
+  /* ─── Base resets ─── */
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* ─── Selection highlight ─── */
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* ─── Custom scrollbar ─── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-subtle rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--subtle-foreground)) hsl(var(--muted));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   @layer components — reusable utility patterns
+   These are the shared building blocks used across marketing sections,
+   dashboards, and app shells. Keep this list small and generic.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* Elevated card on light backgrounds */
+  .card-base {
+    @apply rounded-[14px] border border-border bg-card;
+    box-shadow: 0 1px 3px hsl(var(--ink) / 0.04), 0 4px 12px hsl(var(--ink) / 0.03);
+    transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .card-base:hover {
+    box-shadow: 0 4px 20px hsl(var(--ink) / 0.08), 0 8px 32px hsl(var(--ink) / 0.04);
+    transform: translateY(-2px);
+    @apply border-primary;
+  }
+
+  /* Card on dark "ink" sections */
+  .card-dark {
+    @apply rounded-[14px] border border-ink-border bg-ink-card;
+    box-shadow: 0 2px 8px hsl(var(--ink) / 0.3);
+    transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .card-dark:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: 0 4px 24px hsl(var(--ink) / 0.4);
+    transform: translateY(-2px);
+  }
+
+  /* Small uppercase label above a section heading */
+  .section-heading-eyebrow {
+    @apply mb-4 inline-block font-mono text-[10px] uppercase tracking-[4px] text-primary;
+  }
+
+  /* Large responsive section heading */
+  .section-heading-display {
+    @apply font-display font-semibold leading-tight text-foreground;
+    font-size: clamp(32px, 5vw, 52px);
+    letter-spacing: -2px;
+  }
+
+  /* Primary CTA button (for raw <a>/<Link> usage outside the Button component) */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-[6px] bg-primary px-6 py-3 font-sans text-[14px] font-semibold text-primary-foreground transition-all duration-200;
+  }
+
+  .btn-primary:hover {
+    @apply bg-primary-dark shadow-glow;
+    transform: scale(1.01);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  /* Secondary / ghost button on light backgrounds */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-[6px] border border-border bg-background px-6 py-3 font-sans text-[14px] font-semibold text-foreground transition-all duration-200;
+  }
+
+  .btn-ghost:hover {
+    @apply border-primary text-primary;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   View Transition keyframes (next-view-transitions)
+   ═══════════════════════════════════════════════════════════════════════════ */
+::view-transition-old(root) {
+  animation: 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both page-exit;
+}
+
+::view-transition-new(root) {
+  animation: 350ms cubic-bezier(0.25, 0.1, 0.25, 1) both page-enter;
+}
+
+@keyframes page-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skeleton shimmer (referenced via animate-[skeleton-shimmer_1.5s_infinite]) */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Subtle floating animation for decorative elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Accessibility: Reduced Motion
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
