@@ -3,11 +3,20 @@ import type { QueryResultRow } from 'pg'
 
 let _sql: ReturnType<typeof neon> | null = null
 
+function normalizeEnvValue(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    return trimmed.slice(1, -1)
+  }
+  return trimmed
+}
+
 function getSql() {
   if (!_sql) {
-    const url = process.env.DATABASE_URL
+    const url = normalizeEnvValue(process.env.DATABASE_URL)
     if (!url) {
-      throw new Error('No database connection string was provided to `neon()`. Perhaps an environment variable has not been set?')
+      throw new Error('No database connection string was provided to `neon()`. Perhaps an environment variable has not been set or quoted incorrectly?')
     }
     _sql = neon(url)
   }

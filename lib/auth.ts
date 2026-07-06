@@ -1,7 +1,16 @@
 import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
 
-const SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-production'
+function normalizeEnvValue(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    return trimmed.slice(1, -1)
+  }
+  return trimmed
+}
+
+const SECRET = normalizeEnvValue(process.env.JWT_SECRET) || 'fallback-secret-do-not-use-in-production'
 
 export interface JwtUser {
   id: string
