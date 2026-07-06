@@ -35,6 +35,11 @@ export default function ErrorBoundary({
               Digest: {error.digest}
             </p>
           )}
+          {error.message && (
+            <p className="text-xs font-mono text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-400 p-3 rounded border border-red-200 dark:border-red-800/50 break-all text-left">
+              {error.message}
+            </p>
+          )}
         </div>
 
         {/* Action Controls */}
