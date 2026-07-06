@@ -1,20 +1,31 @@
 import { neon, Pool } from '@neondatabase/serverless'
 import type { QueryResultRow } from 'pg'
 
-const sql = neon(process.env.DATABASE_URL!)
+let _sql: ReturnType<typeof neon> | null = null
+
+function getSql() {
+  if (!_sql) {
+    const url = process.env.DATABASE_URL
+    if (!url) {
+      throw new Error('No database connection string was provided to `neon()`. Perhaps an environment variable has not been set?')
+    }
+    _sql = neon(url)
+  }
+  return _sql
+}
 
 export async function query<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[]
 ): Promise<T[]> {
-  return sql.query(text, params) as Promise<T[]>
+  return getSql().query(text, params) as Promise<T[]>
 }
 
 export async function queryOne<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[]
 ): Promise<T | null> {
-  const rows = await sql.query(text, params) as T[]
+  const rows = await getSql().query(text, params) as T[]
   return rows[0] ?? null
 }
 
@@ -22,7 +33,7 @@ export async function execute(
   text: string,
   params?: unknown[]
 ): Promise<{ rowCount: number }> {
-  const result = await sql.query(text, params, { fullResults: true }) as any
+  const result = await getSql().query(text, params, { fullResults: true }) as any
   return { rowCount: result.rowCount ?? 0 }
 }
 
@@ -67,7 +78,7 @@ export async function transaction<T>(
 
 export async function testConnection(): Promise<boolean> {
   try {
-    await sql.query('SELECT 1')
+    await getSql().query('SELECT 1')
     return true
   } catch {
     return false
