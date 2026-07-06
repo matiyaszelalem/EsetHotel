@@ -40,6 +40,8 @@ export async function POST(req: Request) {
     return response
   } catch (error: any) {
     console.error('Error in login:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    const isDebug = process.env.SERVER_DEBUG === 'true' || process.env.NEXT_PUBLIC_DEBUG === 'true'
+    const message = isDebug ? error?.message || 'Internal Server Error' : 'Internal Server Error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
