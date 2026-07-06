@@ -1,6 +1,6 @@
 import Link from 'next/link'
+import { queryOne } from '@/lib/db'
 
-/* ─── Social SVG Icons ─── */
 function TwitterIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -9,180 +9,137 @@ function TwitterIcon({ className }: { className?: string }) {
   )
 }
 
-function GithubIcon({ className }: { className?: string }) {
+function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
     </svg>
   )
 }
 
-function LinkedInIcon({ className }: { className?: string }) {
+function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-      <rect width="4" height="12" x="2" y="9" />
-      <circle cx="4" cy="4" r="2" />
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
     </svg>
   )
 }
 
-function YoutubeIcon({ className }: { className?: string }) {
+function TripAdvisorIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z" />
-      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="8" cy="12" r="2.5" />
+      <circle cx="16" cy="12" r="2.5" />
+      <path d="M12 12c0 2 1.5 3 2.5 3s2.5-1 2.5-3" />
+      <path d="M12 12c0 2-1.5 3-2.5 3S7 14 7 12" />
     </svg>
   )
 }
 
-/* ─── Link Data ─── */
-const productLinks = [
-  { href: '#features', label: 'Features' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#testimonials', label: 'Testimonials' },
-  { href: '#', label: 'Changelog' },
+const exploreLinks = [
+  { href: '#hero', label: 'Home' },
+  { href: '#rooms', label: 'Rooms & Suites' },
+  { href: '#amenities', label: 'Amenities' },
+  { href: '#gallery', label: 'Photo Gallery' },
 ]
 
-const companyLinks = [
-  { href: '#', label: 'About Us' },
-  { href: '#contact', label: 'Contact' },
-  { href: '#', label: 'Careers' },
-  { href: '#', label: 'Blog' },
+const servicesLinks = [
+  { href: '#special-offers', label: 'Special Offers' },
+  { href: '#location', label: 'Location & Map' },
+  { href: '#faq', label: 'FAQ' },
+  { href: '#contact', label: 'Inquiries' },
 ]
 
-const legalLinks = [
+const policyLinks = [
+  { href: '/policies/cancellation', label: 'Cancellation Policy' },
   { href: '#', label: 'Privacy Policy' },
   { href: '#', label: 'Terms of Service' },
   { href: '#', label: 'Cookie Policy' },
 ]
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-export function Footer() {
+export async function Footer() {
   const currentYear = new Date().getFullYear()
+
+  const settings = await queryOne<{ address: string | null }>(
+    'SELECT address FROM hotel_settings LIMIT 1'
+  )
+  const hotelAddress = settings?.address || 'Bole Road, Addis Ababa, Ethiopia'
 
   return (
     <footer className="bg-ink border-t border-ink-border">
       <div className="mx-auto w-full max-w-[1200px] px-6 py-16 sm:px-8 sm:py-20">
-
-        {/* Main grid */}
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-
-          {/* Column 1 — Brand */}
           <div className="flex flex-col items-start">
             <Link href="/" className="inline-flex items-center">
               <span className="font-display text-[20px] font-bold tracking-[-1.5px]">
-                <span className="text-white">Project</span>
-                <span className="text-primary">Name</span>
+                <span className="text-white">Eset</span>
+                <span className="text-primary">Hotel</span>
               </span>
             </Link>
-
             <p className="mt-4 font-sans text-[13px] text-white/40 leading-relaxed">
-              The modern platform for teams who build fast, iterate faster, and deliver exceptional experiences.
+              Experience the perfect blend of modern luxury and authentic Ethiopian hospitality in the heart of Addis Ababa. Your extraordinary stay awaits.
             </p>
-
             <div className="mt-6 flex items-center gap-5">
-              <Link
-                href="#"
-                className="text-white/30 transition-colors hover:text-white"
-                aria-label="Twitter"
-              >
+              <Link href="#" className="text-white/30 transition-colors hover:text-white" aria-label="Instagram">
+                <InstagramIcon className="h-[18px] w-[18px]" />
+              </Link>
+              <Link href="#" className="text-white/30 transition-colors hover:text-white" aria-label="Facebook">
+                <FacebookIcon className="h-[18px] w-[18px]" />
+              </Link>
+              <Link href="#" className="text-white/30 transition-colors hover:text-white" aria-label="Twitter">
                 <TwitterIcon className="h-[18px] w-[18px]" />
               </Link>
-              <Link
-                href="#"
-                className="text-white/30 transition-colors hover:text-white"
-                aria-label="GitHub"
-              >
-                <GithubIcon className="h-[18px] w-[18px]" />
-              </Link>
-              <Link
-                href="#"
-                className="text-white/30 transition-colors hover:text-white"
-                aria-label="LinkedIn"
-              >
-                <LinkedInIcon className="h-[18px] w-[18px]" />
-              </Link>
-              <Link
-                href="#"
-                className="text-white/30 transition-colors hover:text-white"
-                aria-label="YouTube"
-              >
-                <YoutubeIcon className="h-[18px] w-[18px]" />
+              <Link href="#" className="text-white/30 transition-colors hover:text-white" aria-label="TripAdvisor">
+                <TripAdvisorIcon className="h-[18px] w-[18px]" />
               </Link>
             </div>
           </div>
 
-          {/* Column 2 — Product */}
           <div className="flex flex-col">
-            <h3 className="font-mono text-[10px] uppercase tracking-[4px] text-primary">
-              Product
-            </h3>
+            <h3 className="font-mono text-[10px] uppercase tracking-[4px] text-primary">Explore</h3>
             <ul className="mt-6 flex flex-col gap-[10px]">
-              {productLinks.map((link) => (
+              {exploreLinks.map((link) => (
                 <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="font-sans text-[14px] text-white/45 transition-colors hover:text-white/90"
-                  >
-                    {link.label}
-                  </Link>
+                  <Link href={link.href} className="font-sans text-[14px] text-white/45 transition-colors hover:text-white/90">{link.label}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Column 3 — Company */}
           <div className="flex flex-col">
-            <h3 className="font-mono text-[10px] uppercase tracking-[4px] text-primary">
-              Company
-            </h3>
+            <h3 className="font-mono text-[10px] uppercase tracking-[4px] text-primary">Services</h3>
             <ul className="mt-6 flex flex-col gap-[10px]">
-              {companyLinks.map((link) => (
+              {servicesLinks.map((link) => (
                 <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="font-sans text-[14px] text-white/45 transition-colors hover:text-white/90"
-                  >
-                    {link.label}
-                  </Link>
+                  <Link href={link.href} className="font-sans text-[14px] text-white/45 transition-colors hover:text-white/90">{link.label}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Column 4 — Legal */}
           <div className="flex flex-col">
-            <h3 className="font-mono text-[10px] uppercase tracking-[4px] text-primary">
-              Legal
-            </h3>
+            <h3 className="font-mono text-[10px] uppercase tracking-[4px] text-primary">Policies</h3>
             <ul className="mt-6 flex flex-col gap-[10px]">
-              {legalLinks.map((link) => (
+              {policyLinks.map((link) => (
                 <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="font-sans text-[14px] text-white/45 transition-colors hover:text-white/90"
-                  >
-                    {link.label}
-                  </Link>
+                  <Link href={link.href} className="font-sans text-[14px] text-white/45 transition-colors hover:text-white/90">{link.label}</Link>
                 </li>
               ))}
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-ink-border pt-8 sm:mt-20 sm:flex-row">
           <p className="font-sans text-[12px] text-white/25 text-center sm:text-left">
-            © {currentYear} ProjectName. All rights reserved.
+            © {currentYear} Eset Hotel. All rights reserved.
           </p>
           <p className="font-sans text-[12px] text-white/25 text-center sm:text-right">
-            Built with ❤️ by Your Team
+            {hotelAddress}
           </p>
         </div>
-
       </div>
     </footer>
   )

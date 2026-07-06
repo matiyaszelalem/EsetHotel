@@ -1,15 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    UI STARTER — globals.css
-   This file is the single source of truth for the design system's "feel":
-   colors, fonts, and a small set of reusable component classes.
-
-   TO REBRAND FOR A NEW PROJECT:
-   1. Edit the HSL values in :root below (especially --primary, --primary-dark,
-      --primary-light, and --background/--foreground if you want a different
-      base palette).
-   2. Swap the font families loaded in app/layout.tsx and update the
-      `--font-*` variable names if needed.
-   That's it — every component and utility class derives from these.
+   Single source of truth for colors, typography, and shared UI patterns.
+   Premium Light Luxury Theme — Warm Ivory & Gold
+     Ivory Cream #F8F4EE · Warm Stone #EFE9E2 · Sophisticated Gold #B1843E
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @tailwind base;
@@ -22,53 +15,140 @@
 @layer base {
 
   :root {
-    /* ─── Surfaces & text (Now crisp, bright, and premium) ─── */
-    --background: 0 0% 100%;         /* Shifted to pure white to maximize breathing room */
-    --foreground: 171 91% 8%;        /* #022923 - Your deep brand green acts as the premium text color */
+    /* ════════════════════════════════════════
+       CORE SURFACES
+       Warm cream linen (#F8F4EE) canvas, pure white (#FFF) cards,
+       warm dark (#2A2520) text
+       ════════════════════════════════════════ */
 
-    --card: 160 5% 96%;              /* #F0F0F0 - Your light gray now beautifully frames content cards */
-    --card-foreground: 171 91% 8%;
+    --background: 35 5% 95%;
+    /* #F8F4EE - Warm cream linen backdrop */
+    --foreground: 30 8% 14%;
+    /* #2A2520 - Warm dark brown text */
+
+    --card: 0 0% 100%;
+    /* #FFFFFF - Pure white cards for depth */
+    --card-foreground: 30 8% 14%;
+    /* Same warm dark text */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 171 91% 8%;
+    --popover-foreground: 30 8% 14%;
 
-    --secondary: 167 33% 95%;        /* An ultra-soft mint-tinted gray for secondary elements */
-    --secondary-foreground: 167 33% 27%;
+    --secondary: 35 5% 87%;
+    /* Warm light stone for structural elements */
+    --secondary-foreground: 30 8% 20%;
 
-    --muted: 167 20% 93%;            /* Soft, clean divider tone */
-    --muted-foreground: 167 15% 40%;
+    --muted: 35 5% 88%;
+    /* #EFE9E2 - Soft warm divider tone */
+    --muted-foreground: 35 6% 42%;
+    /* Medium warm gray for descriptions */
 
-    --subtle-foreground: 167 10% 55%;
+    --subtle-foreground: 35 5% 55%;
 
-    --border: 167 15% 90%;           
-    --input: 167 15% 90%;
-    --radius: 0.65rem;
+    --border: 35 10% 85%;
+    /* #E3DCD2 - Warm hairline border */
+    --input: 35 10% 85%;
 
-    /* ─── Brand Accents (Promoted the lighter green to main Primary) ─── */
-    --primary: 167 33% 27%;          /* #2E5B51 - The lighter green you love is now the star of the show */
-    --primary-foreground: 0 0% 100%; /* Keeps crisp white text contrast on buttons */
-    --primary-dark: 167 35% 20%;     /* Richer, deeper green strictly reserved for button hover states */
-    --primary-light: 167 30% 93%;    /* An ultra-light, refreshing mint for subtle accents/background highlights */
-    --ring: 167 33% 27%;
+    --radius: 0.75rem;
+    /* Fluid, modern border radius */
 
-    --accent: 167 33% 27%;
+    /* ════════════════════════════════════════
+       BRAND FOUNDATION
+       Sophisticated Gold (#B1843E) → Primary & Accent
+       ════════════════════════════════════════ */
+
+    --primary: 38 45% 46%;
+    /* #B1843E - Sophisticated warm gold */
+    --primary-foreground: 0 0% 100%;
+    /* White for contrast on gold buttons */
+
+    --primary-dark: 38 45% 36%;
+    /* #8E6A2C - Deeper gold for hover states */
+    --primary-light: 38 20% 85%;
+    /* Light gold tint for micro-states */
+
+    --ring: 38 45% 46%;
+    /* Gold focus rings */
+
+    --accent: 38 45% 46%;
+    /* Same sophisticated gold as accent */
     --accent-foreground: 0 0% 100%;
+    /* White for contrast */
 
-    /* ─── Status colors ─── */
-    --destructive: 0 75% 59%;        
-    --destructive-foreground: 0 0% 98%;
-    --success: 71 80% 50%;           /* #BFE619 - Your lime green pops perfectly against the clean white/gray layout */
-    --warning: 39 100% 45%;          
-    --info: 215 86% 57%;             
+    /* ════════════════════════════════════════
+       SEMANTIC STATUS COLORS
+       Muted, sophisticated tones for the light palette
+       ════════════════════════════════════════ */
 
-    /* ─── Dark "ink" surfaces ─── */
-    --ink: 171 91% 8%;               /* #022923 - Deepest brand green */
-    --ink-soft: 171 70% 12%;
-    --ink-card: 171 50% 15%;          
-    --ink-border: 171 40% 22%;
+    --destructive: 0 60% 50%;
+    /* Muted rose-red */
+    --destructive-foreground: 0 0% 100%;
+    --success: 145 25% 40%;
+    /* Muted sage green */
+    --warning: 38 80% 50%;
+    /* Warm amber */
+    --info: 200 35% 50%;
+    /* Muted ocean blue */
+
+    /* ════════════════════════════════════════
+       BRAND ACCENT COLORS
+       Key palette colors for direct Tailwind usage
+       ════════════════════════════════════════ */
+
+    --brand-ivory: 35 5% 95%;
+    /* #F8F4EE - Warm cream */
+    --brand-gold: 38 45% 46%;
+    /* #B1843E - Sophisticated gold */
+    --brand-stone: 35 5% 90%;
+    /* #E8E3DC - Warm stone */
+    --brand-warm-dark: 30 8% 14%;
+    /* #2A2520 - Warm text */
+
+    /* ════════════════════════════════════════
+       DASHBOARD / DATA VISUALIZATION ACCENTS
+       ════════════════════════════════════════ */
+
+    --accent-gold: 38 45% 46%;
+    --accent-stone: 35 5% 55%;
+    --accent-warm: 30 5% 35%;
+    --accent-rose: 0 40% 55%;
+    --accent-sage: 145 15% 42%;
+    --accent-sand: 35 8% 70%;
+
+    --chart-1: var(--accent-gold);
+    --chart-2: var(--accent-warm);
+    --chart-3: var(--accent-stone);
+    --chart-4: var(--accent-rose);
+    --chart-5: var(--accent-sage);
+    --chart-6: var(--accent-sand);
+    --chart-7: var(--accent-gold);
+    --chart-8: var(--accent-warm);
+
+    /* ════════════════════════════════════════
+       DARK "INK" SURFACES
+       For inverted sections (hero overlay, dashboard sidebar)
+       ════════════════════════════════════════ */
+
+    --ink: 30 15% 8%;
+    /* Warm near-black for dark backgrounds */
+    --ink-soft: 30 10% 11%;
+    --ink-card: 30 8% 14%;
+    --ink-border: 30 6% 20%;
+
+    /* ════════════════════════════════════════
+       SPECIAL STATES
+       ════════════════════════════════════════ */
+
+    --premium: 38 45% 46%;
+    /* Sophisticated Gold */
+    --premium-soft: 38 20% 85%;
+
+    --glass-background: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.12;
   }
 
   /* ─── Base resets ─── */
+
   * {
     @apply border-border;
   }
@@ -82,11 +162,13 @@
   }
 
   /* ─── Selection highlight ─── */
+
   ::selection {
-    @apply bg-primary text-primary-foreground;
+    @apply bg-accent text-accent-foreground;
   }
 
   /* ─── Custom scrollbar ─── */
+
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -97,93 +179,107 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-subtle rounded-full;
+    @apply bg-muted-foreground/30 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary;
+    @apply bg-primary/60;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--subtle-foreground)) hsl(var(--muted));
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted));
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   @layer components — reusable utility patterns
-   These are the shared building blocks used across marketing sections,
-   dashboards, and app shells. Keep this list small and generic.
+   @layer components
    ═══════════════════════════════════════════════════════════════════════════ */
+
 @layer components {
 
-  /* Elevated card on light backgrounds */
+  /* Elevated card */
+
   .card-base {
-    @apply rounded-[14px] border border-border bg-card;
-    box-shadow: 0 1px 3px hsl(var(--ink) / 0.04), 0 4px 12px hsl(var(--ink) / 0.03);
+    @apply rounded-[16px] border border-border bg-card;
+    box-shadow:
+      0 1px 3px hsl(var(--ink) / 0.02),
+      0 12px 30px -4px hsl(var(--ink) / 0.03);
     transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   .card-base:hover {
-    box-shadow: 0 4px 20px hsl(var(--ink) / 0.08), 0 8px 32px hsl(var(--ink) / 0.04);
+    box-shadow:
+      0 4px 16px hsl(var(--ink) / 0.03),
+      0 24px 45px -5px hsl(var(--ink) / 0.05);
     transform: translateY(-2px);
-    @apply border-primary;
+    border-color: hsl(var(--accent) / 0.25);
   }
 
-  /* Card on dark "ink" sections */
+  /* Card on dark surfaces */
+
   .card-dark {
-    @apply rounded-[14px] border border-ink-border bg-ink-card;
-    box-shadow: 0 2px 8px hsl(var(--ink) / 0.3);
+    @apply rounded-[16px] border border-ink-border bg-ink-card;
+    box-shadow: 0 4px 16px hsl(var(--ink) / 0.4);
     transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   .card-dark:hover {
-    border-color: hsl(var(--primary) / 0.4);
-    box-shadow: 0 4px 24px hsl(var(--ink) / 0.4);
+    border-color: hsl(var(--accent) / 0.4);
+    box-shadow: 0 8px 32px hsl(var(--ink) / 0.5);
     transform: translateY(-2px);
   }
 
-  /* Small uppercase label above a section heading */
+  /* Section heading */
+
   .section-heading-eyebrow {
-    @apply mb-4 inline-block font-mono text-[10px] uppercase tracking-[4px] text-primary;
+    @apply mb-4 inline-block font-mono text-[10px] uppercase tracking-[4px] text-accent font-bold;
   }
 
-  /* Large responsive section heading */
   .section-heading-display {
-    @apply font-display font-semibold leading-tight text-foreground;
+    @apply font-display font-semibold leading-tight text-foreground tracking-tight;
     font-size: clamp(32px, 5vw, 52px);
-    letter-spacing: -2px;
+    letter-spacing: -1.5px;
   }
 
-  /* Primary CTA button (for raw <a>/<Link> usage outside the Button component) */
+  /* Primary CTA */
+
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-[6px] bg-primary px-6 py-3 font-sans text-[14px] font-semibold text-primary-foreground transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-[8px] bg-primary px-6 py-3 font-sans text-[14px] font-semibold text-primary-foreground transition-all duration-200;
   }
 
   .btn-primary:hover {
-    @apply bg-primary-dark shadow-glow;
-    transform: scale(1.01);
+    @apply bg-primary-dark;
+    box-shadow:
+      0 10px 24px hsl(var(--primary) / 0.2),
+      0 4px 8px hsl(var(--primary) / 0.1);
+    transform: translateY(-1px);
   }
 
   .btn-primary:active {
     transform: scale(0.98);
   }
 
-  /* Secondary / ghost button on light backgrounds */
+  /* Secondary / Ghost button */
+
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-[6px] border border-border bg-background px-6 py-3 font-sans text-[14px] font-semibold text-foreground transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-[8px] border border-border bg-background px-6 py-3 font-sans text-[14px] font-semibold text-foreground transition-all duration-200;
   }
 
   .btn-ghost:hover {
-    @apply border-primary text-primary;
+    @apply text-primary;
+    border-color: hsl(var(--primary) / 0.3);
+    background: hsl(var(--primary-light));
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   View Transition keyframes (next-view-transitions)
+   View Transition keyframes
    ═══════════════════════════════════════════════════════════════════════════ */
+
 ::view-transition-old(root) {
-  animation: 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both page-exit;
+  animation: 250ms cub
+ic-bezier(0.25, 0.1, 0.25, 1) both page-exit;
 }
 
 ::view-transition-new(root) {
@@ -195,6 +291,7 @@
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(-8px);
@@ -206,27 +303,30 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Skeleton shimmer (referenced via animate-[skeleton-shimmer_1.5s_infinite]) */
 @keyframes skeleton-shimmer {
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
 }
 
-/* Subtle floating animation for decorative elements */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-6px);
   }
@@ -235,14 +335,12 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Accessibility: Reduced Motion
    ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (prefers-reduced-motion: reduce) {
+
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;
-  }
-
-  html {
-    scroll-behavior: auto;
   }
 
   *,
@@ -251,5 +349,17 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GSAP Preview State
+   Elements are visible by default and GSAP will animate them when the page
+   scrolls into view. This avoids blank sections while hydration or JS loading
+   is still in progress.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.gsap-reveal {
+  opacity: 1;
+  transform: translateY(0);
 }

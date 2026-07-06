@@ -1,19 +1,110 @@
 'use client'
 
-import { useRef } from 'react'
-import Link from 'next/link'
+import Image from 'next/image'
+import { useRef, useState, useEffect, useTransition, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { CalendarDays, Users, Search, Loader2 } from 'lucide-react'
 import { useGSAP } from '@/lib/hooks/useGSAP'
 
-export function Hero() {
+function formatDate(d: Date) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+}
+
+function todayStr() { return formatDate(new Date()) }
+function tomorrowStr() {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return formatDate(d)
+}
+
+interface HeroContent {
+  eyebrow: string
+  title: string
+  subtitle: string
+  ctaText: string
+  imageUrl: string
+  stats: { label: string; value: number; suffix: string; prefix: string }[]
+}
+
+const fallbackHeroContent: HeroContent = {
+  eyebrow: 'Welcome to Eset Hotel',
+  title: 'Your Premier Stay in Addis Ababa',
+  subtitle: 'Experience luxury, comfort, and exceptional hospitality in the heart of the city.',
+  ctaText: 'Check Availability',
+  imageUrl: '/images/hero-background.png',
+  stats: [
+    { label: 'Rooms', value: 22, suffix: '+', prefix: '' },
+    { label: 'Years Experience', value: 12, suffix: '+', prefix: '' },
+    { label: 'Guests Served', value: 5000, suffix: '+', prefix: '' },
+    { label: 'Amenities', value: 48, suffix: '+', prefix: '' },
+  ],
+}
+
+function HeroInner() {
   const container = useRef<HTMLElement>(null)
+  const [heroContent, setHeroContent] = useState<HeroContent>(fallbackHeroContent)
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(fallbackHeroContent.imageUrl)
+
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const checkIn = searchParams.get('checkIn') || todayStr()
+  const checkOut = searchParams.get('checkOut') || tomorrowStr()
+  const guests = searchParams.get('guests') || '2'
+
+  const updateParam = (key: string, value: string) => {
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set(key, value)
+      router.replace('?' + params.toString(), { scroll: false })
+    })
+  }
+
+  const handleSearch = () => {
+    const params = new URLSearchParams()
+    params.set('checkIn', checkIn)
+    params.set('checkOut', checkOut)
+    params.set('guests', guests)
+    router.push('/booking?' + params.toString())
+  }
+
+  useEffect(() => {
+    let canceled = false
+
+    fetch('/api/content/hero')
+      .then((res) => res.json())
+      .then((data) => {
+        if (canceled || !data || typeof data !== 'object') return
+
+        const patch = {
+          eyebrow: data.eyebrow ?? fallbackHeroContent.eyebrow,
+          title: data.title ?? fallbackHeroContent.title,
+          subtitle: data.subtitle ?? fallbackHeroContent.subtitle,
+          ctaText: data.ctaText ?? fallbackHeroContent.ctaText,
+          imageUrl: data.imageUrl ?? fallbackHeroContent.imageUrl,
+          stats: Array.isArray(data.stats) ? data.stats : fallbackHeroContent.stats,
+        }
+
+        setHeroContent(patch)
+        setHeroImageUrl(patch.imageUrl)
+      })
+      .catch(() => {
+        setHeroContent(fallbackHeroContent)
+        setHeroImageUrl(fallbackHeroContent.imageUrl)
+      })
+
+    return () => {
+      canceled = true
+    }
+  }, [])
 
   useGSAP(
     (gsap) => {
-      if (!container.current) return
+      if (!container.current || !heroContent) return
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
-      // Animate text elements
       tl.fromTo('.hero-eyebrow',
         { y: 18, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.45 }
@@ -28,10 +119,10 @@ export function Hero() {
         { y: 0, opacity: 1, duration: 0.45 },
         '-=0.35'
       )
-      .fromTo('.hero-cta',
-        { y: 14, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.40 },
-        '-=0.30'
+      .fromTo('.hero-booking-widget',
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.50 },
+        '-=0.25'
       )
       .fromTo('.hero-stats span',
         { y: 10, opacity: 0 },
@@ -39,31 +130,11 @@ export function Hero() {
         '-=0.25'
       )
 
-      // Floating mockup entrance
-      tl.fromTo('.hero-mockup',
-        { y: 60, opacity: 0, scale: 0.95 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' },
-        '-=0.50'
-      )
-
-      // Navbar reveal
-      gsap.fromTo('.navbar',
-        { y: -16, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.1 }
-      )
-
-      // Scroll indicator
-      tl.fromTo('.hero-scroll',
-        { opacity: 0 },
-        { opacity: 1, duration: 0.35 },
-        '-=0.20'
-      )
-
-      // Stat counters
       const counters = container.current.querySelectorAll('[data-counter]')
       counters.forEach((counterEl) => {
         const targetValue = parseInt(counterEl.getAttribute('data-counter') || '0', 10)
         const suffix = counterEl.getAttribute('data-suffix') || ''
+        const prefix = counterEl.getAttribute('data-prefix') || ''
         const counterObj = { val: 0 }
 
         gsap.to(counterObj, {
@@ -73,188 +144,156 @@ export function Hero() {
           snap: { val: 1 },
           delay: 0.8,
           onUpdate: () => {
-            counterEl.textContent = `${counterObj.val.toLocaleString()}${suffix}`
+            counterEl.textContent = `${prefix}${counterObj.val.toLocaleString()}${suffix}`
           },
         })
       })
 
-      // Gentle floating animation for the mockup
-      gsap.to('.hero-mockup', {
-        y: -12,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-        delay: 1.5
-      })
+      gsap.fromTo('.navbar',
+        { y: -16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.1 }
+      )
+
+      tl.fromTo('.hero-scroll',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.35 },
+        '-=0.20'
+      )
     },
-    []
+    [heroContent]
   )
 
   return (
-    <section ref={container} className="relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-background">
-      {/* Subtle gradient background */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 60% at 20% 50%, hsl(var(--primary) / 0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 80% at 80% 30%, hsl(var(--primary) / 0.03) 0%, transparent 60%),
-            linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--card)) 40%, hsl(var(--background)) 100%)
-          `
-        }}
-      />
+    <section ref={container} className="relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden" id="hero">
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={heroImageUrl}
+          alt="Hero background"
+          fill
+          className="object-cover"
+          sizes="100vw"
+          priority
+          onError={() => setHeroImageUrl(fallbackHeroContent.imageUrl)}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(180deg,
+                rgba(42,37,32,0.70) 0%,
+                rgba(42,37,32,0.40) 50%,
+                rgba(42,37,32,0.65) 80%,
+                rgba(42,37,32,0.90) 100%
+              )
+            `
+          }}
+        />
+      </div>
 
-      {/* Decorative grid dots */}
-      <div
-        className="absolute inset-0 z-0 opacity-[0.03]"
-        style={{
-          backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)',
-          backgroundSize: '24px 24px'
-        }}
-      />
+      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col items-center px-6 pt-32 pb-16 sm:px-8 lg:pt-36 lg:pb-24">
 
-      {/* Content layer */}
-      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col items-center px-6 pt-28 pb-10 sm:px-8 lg:flex-row lg:items-center lg:gap-10 lg:pt-24 lg:pb-16">
+        <div className="flex w-full flex-col items-center text-center">
 
-        {/* ─── Left: Text Content ─── */}
-        <div className="flex w-full flex-col items-center text-center lg:w-[52%] lg:items-start lg:text-left">
-
-          <span className="hero-eyebrow mb-5 inline-block rounded-full border border-primary/20 bg-primary/[0.04] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[4px] text-primary opacity-0">
-            Build · Ship · Scale
+          <span className="hero-eyebrow mb-5 inline-block rounded-full border border-white/20 bg-white/[0.08] px-5 py-2 font-mono text-[10px] uppercase tracking-[4px] text-white/80 backdrop-blur-sm">
+            {heroContent.eyebrow}
           </span>
 
-          <h1 className="hero-headline mb-5 font-display font-bold leading-[0.95] tracking-[-3px] text-foreground opacity-0" style={{ fontSize: 'clamp(38px, 6vw, 76px)' }}>
-            Ship Products<br />
-            That Matter<span className="text-primary">.</span>
+          <h1 className="hero-headline mb-6 font-display font-bold leading-[0.95] tracking-[-3px] text-white" style={{ fontSize: 'clamp(38px, 7vw, 82px)' }}>
+            {heroContent.title}<span className="text-primary-light">.</span>
           </h1>
 
-          <p className="hero-body mx-auto mb-8 max-w-[480px] font-sans text-[15px] leading-[1.8] text-muted-foreground opacity-0 sm:text-[17px] lg:mx-0">
-            The modern platform for teams who build fast, iterate faster, and deliver exceptional digital experiences at scale.
+          <p className="hero-body mx-auto mb-10 max-w-[560px] font-sans text-[16px] leading-[1.8] text-white/70 sm:text-[18px]">
+            {heroContent.subtitle}
           </p>
 
-          {/* ─── Mobile: Dashboard Mockup ─── */}
-          <div className="relative mb-10 flex w-full items-center justify-center lg:hidden">
-            <DashboardMockup />
+          <div className="hero-booking-widget w-full max-w-[800px]" id="booking-bar">
+            <div className="rounded-[16px] border border-white/10 bg-white/[0.08] p-3 backdrop-blur-xl sm:p-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+                <div className="flex flex-col rounded-[10px] bg-white/[0.08] px-4 py-3 transition-colors hover:bg-white/[0.12]">
+                  <label className="mb-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[2px] text-white/50">
+                    <CalendarDays size={12} />
+                    Check In
+                  </label>
+                  <input
+                    type="date"
+                    value={checkIn}
+                    onChange={(e) => updateParam('checkIn', e.target.value)}
+                    className="w-full bg-transparent font-sans text-[14px] font-medium text-white outline-none placeholder:text-white/30 [&::-webkit-calendar-picker-indicator]:invert"
+                  />
+                </div>
+
+                <div className="flex flex-col rounded-[10px] bg-white/[0.08] px-4 py-3 transition-colors hover:bg-white/[0.12]">
+                  <label className="mb-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[2px] text-white/50">
+                    <CalendarDays size={12} />
+                    Check Out
+                  </label>
+                  <input
+                    type="date"
+                    value={checkOut}
+                    onChange={(e) => updateParam('checkOut', e.target.value)}
+                    className="w-full bg-transparent font-sans text-[14px] font-medium text-white outline-none placeholder:text-white/30 [&::-webkit-calendar-picker-indicator]:invert"
+                  />
+                </div>
+
+                <div className="flex flex-col rounded-[10px] bg-white/[0.08] px-4 py-3 transition-colors hover:bg-white/[0.12]">
+                  <label className="mb-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[2px] text-white/50">
+                    <Users size={12} />
+                    Guests
+                  </label>
+                  <select
+                    value={guests}
+                    onChange={(e) => updateParam('guests', e.target.value)}
+                    className="w-full appearance-none bg-transparent font-sans text-[14px] font-medium text-white outline-none"
+                  >
+                    <option value="1" className="text-foreground">1 Guest</option>
+                    <option value="2" className="text-foreground">2 Guests</option>
+                    <option value="3" className="text-foreground">3 Guests</option>
+                    <option value="4" className="text-foreground">4 Guests</option>
+                    <option value="5" className="text-foreground">5+ Guests</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleSearch}
+                  disabled={isPending}
+                  className="flex items-center justify-center gap-2 rounded-[10px] bg-primary px-6 py-3 font-sans text-[14px] font-semibold text-primary-foreground transition-all hover:bg-primary-dark hover:shadow-glow active:scale-[0.98] disabled:opacity-70"
+                >
+                  {isPending ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+                  {heroContent.ctaText}
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="hero-cta mb-10 flex flex-wrap items-center justify-center gap-3 opacity-0 lg:justify-start">
-            <Link
-              href="/signup"
-              className="btn-primary"
-            >
-              Start Building — Free
-            </Link>
-            <Link
-              href="#features"
-              className="btn-ghost"
-            >
-              See Features →
-            </Link>
+          <div className="hero-stats mt-12 grid grid-cols-2 gap-6 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-10">
+            {heroContent.stats.map((stat, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <span className="font-display text-[28px] font-semibold text-white opacity-0 sm:text-[34px]" data-counter={stat.value} data-suffix={stat.suffix} data-prefix={stat.prefix}>
+                  0
+                </span>
+                <span className="font-mono text-[9px] uppercase tracking-[3px] text-white/40 opacity-0 sm:text-[10px]">
+                  {stat.label}
+                </span>
+              </div>
+            ))}
           </div>
-
-          {/* Stats bar */}
-          <div className="hero-stats grid grid-cols-2 gap-6 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-10 lg:justify-start">
-            <div className="flex flex-col items-center lg:items-start">
-              <span className="font-display text-[28px] font-semibold text-foreground opacity-0 sm:text-[34px]" data-counter="10" data-suffix="K+">0</span>
-              <span className="font-mono text-[9px] uppercase tracking-[3px] text-muted-foreground opacity-0 sm:text-[10px]">Active Users</span>
-            </div>
-            <div className="hidden h-[40px] w-px bg-border sm:block" />
-            <div className="flex flex-col items-center lg:items-start">
-              <span className="font-display text-[28px] font-semibold text-foreground opacity-0 sm:text-[34px]" data-counter="99" data-suffix="%">0</span>
-              <span className="font-mono text-[9px] uppercase tracking-[3px] text-muted-foreground opacity-0 sm:text-[10px]">Uptime SLA</span>
-            </div>
-            <div className="hidden h-[40px] w-px bg-border sm:block" />
-            <div className="flex flex-col items-center lg:items-start">
-              <span className="font-display text-[28px] font-semibold text-foreground opacity-0 sm:text-[34px]" data-counter="50" data-suffix="M+">0</span>
-              <span className="font-mono text-[9px] uppercase tracking-[3px] text-muted-foreground opacity-0 sm:text-[10px]">API Calls / Day</span>
-            </div>
-            <div className="hidden h-[40px] w-px bg-border sm:block" />
-            <div className="flex flex-col items-center lg:items-start">
-              <span className="font-display text-[28px] font-semibold text-foreground opacity-0 sm:text-[34px]" data-counter="24" data-suffix="/7">0</span>
-              <span className="font-mono text-[9px] uppercase tracking-[3px] text-muted-foreground opacity-0 sm:text-[10px]">Support</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ─── Desktop: Dashboard Mockup ─── */}
-        <div className="relative hidden w-full flex-shrink-0 items-center justify-center lg:flex lg:w-[48%]">
-          <DashboardMockup />
         </div>
       </div>
 
-      {/* Scroll indicator */}
       <div className="hero-scroll absolute bottom-[28px] left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-0 z-20">
-        <div className="h-[40px] w-px animate-pulse bg-primary" />
-        <span className="font-mono text-[8px] uppercase tracking-[3px] text-primary/40">Scroll</span>
+        <div className="h-[40px] w-px animate-pulse bg-white/40" />
+        <span className="font-mono text-[8px] uppercase tracking-[3px] text-white/30">Explore</span>
       </div>
     </section>
   )
 }
 
-/* ─── Dashboard Mockup ─── */
-function DashboardMockup() {
+export function Hero() {
   return (
-    <div className="hero-mockup relative w-full max-w-[520px] opacity-0">
-      {/* Decorative glows */}
-      <div className="absolute left-1/2 top-1/2 h-[80%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[80px]" />
-      <div className="absolute right-0 top-[20%] h-[50%] w-[50%] rounded-full bg-success/10 blur-[60px]" />
-
-      {/* Main card */}
-      <div className="relative overflow-hidden rounded-[20px] border border-border bg-card p-5 shadow-2xl backdrop-blur-xl sm:p-6">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-destructive/60" />
-            <div className="h-3 w-3 rounded-full bg-warning/60" />
-            <div className="h-3 w-3 rounded-full bg-success/60" />
-          </div>
-          <div className="h-6 w-[120px] rounded-md bg-muted" />
-        </div>
-
-        {/* Dashboard grid */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="rounded-xl bg-primary/[0.06] p-3">
-            <div className="font-mono text-[9px] uppercase tracking-[2px] text-primary mb-1">Revenue</div>
-            <div className="font-display text-[18px] font-bold text-foreground sm:text-[22px]">$48.2K</div>
-            <div className="font-mono text-[9px] text-success">↑ 12.5%</div>
-          </div>
-          <div className="rounded-xl bg-muted p-3">
-            <div className="font-mono text-[9px] uppercase tracking-[2px] text-muted-foreground mb-1">Users</div>
-            <div className="font-display text-[18px] font-bold text-foreground sm:text-[22px]">2,847</div>
-            <div className="font-mono text-[9px] text-success">↑ 8.3%</div>
-          </div>
-          <div className="rounded-xl bg-muted p-3">
-            <div className="font-mono text-[9px] uppercase tracking-[2px] text-muted-foreground mb-1">Conv.</div>
-            <div className="font-display text-[18px] font-bold text-foreground sm:text-[22px]">5.2%</div>
-            <div className="font-mono text-[9px] text-success">↑ 1.1%</div>
-          </div>
-        </div>
-
-        {/* Chart area placeholder */}
-        <div className="rounded-xl bg-muted/50 p-4">
-          <div className="flex items-end justify-between h-[80px] sm:h-[100px] gap-2">
-            {[35, 55, 42, 68, 52, 78, 62, 88, 72, 95, 82, 70].map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 rounded-t-sm bg-primary/20 transition-all hover:bg-primary/40"
-                style={{ height: `${h}%` }}
-              />
-            ))}
-          </div>
-          <div className="mt-3 flex justify-between">
-            <span className="font-mono text-[8px] text-muted-foreground">Jan</span>
-            <span className="font-mono text-[8px] text-muted-foreground">Jun</span>
-            <span className="font-mono text-[8px] text-muted-foreground">Dec</span>
-          </div>
-        </div>
-
-        {/* Bottom row */}
-        <div className="mt-4 flex items-center justify-between rounded-xl border border-border bg-background/50 p-3">
-          <span className="font-sans text-xs font-medium text-foreground">Latest Deployment</span>
-          <span className="rounded-md bg-success/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-success">Live</span>
-        </div>
-      </div>
-    </div>
+    <Suspense fallback={
+      <section className="relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-ink" />
+    }>
+      <HeroInner />
+    </Suspense>
   )
 }

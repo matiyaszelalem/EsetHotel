@@ -1,12 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MapPin, Phone, Mail, ChevronDown, CheckCircle2, Loader2 } from 'lucide-react'
 
+interface Settings {
+  address: string
+  contactPhone: string
+  contactEmail: string
+}
+
 export function Contact() {
+  const [settings, setSettings] = useState<Settings | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    fetch('/api/content/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.address) {
+          setSettings({
+            address: data.address,
+            contactPhone: data.contactPhone || '',
+            contactEmail: data.contactEmail || '',
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const contactPhone = settings?.contactPhone || '+251 123 456 789'
+  const contactEmail = settings?.contactEmail || 'info@esethotel.com'
+  const contactAddress = settings?.address || 'Bole, Addis Ababa, Ethiopia'
 
   const validate = (form: HTMLFormElement): boolean => {
     const data = new FormData(form)
@@ -27,7 +53,7 @@ export function Contact() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
 
@@ -35,11 +61,32 @@ export function Contact() {
 
     setIsSubmitting(true)
 
-    // Simulate API call
-    setTimeout(() => {
+    const formData = new FormData(form)
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.get('name'),
+          email: formData.get('email'),
+          phone: formData.get('phone') || '',
+          subject: formData.get('subject'),
+          message: formData.get('message'),
+        }),
+      })
+
+      if (res.ok) {
+        setIsSuccess(true)
+      } else {
+        const err = await res.json()
+        setErrors({ form: err.error || 'Failed to send message' })
+      }
+    } catch {
+      setErrors({ form: 'Network error. Please try again.' })
+    } finally {
       setIsSubmitting(false)
-      setIsSuccess(true)
-    }, 1500)
+    }
   }
 
   const resetForm = () => {
@@ -54,17 +101,17 @@ export function Contact() {
 
           {/* Left Column — Info */}
           <div className="lg:col-span-5">
-            <div className="section-header">
+            <div className="section-header gsap-reveal">
               <span className="section-heading-eyebrow inline-block">
-                CONTACT
+                CONTACT US
               </span>
               <h2 className="mt-4 max-w-[380px] section-heading-display" style={{ fontSize: 'clamp(28px, 4vw, 40px)', letterSpacing: '-1px' }}>
-                Let&apos;s build something <span className="text-primary">together.</span>
+                We are here to help <span className="text-primary">plan your stay.</span>
               </h2>
             </div>
 
             <p className="mb-10 mt-4 font-sans text-[15px] leading-[1.8] text-muted-foreground">
-              Have a question about our platform, need a custom plan, or just want to say hello? We&apos;d love to hear from you.
+              Have questions about reservations, group bookings, events, or special requests? Get in touch with our team, and we will assist you promptly.
             </p>
 
             <div className="flex flex-col gap-5">
@@ -75,29 +122,27 @@ export function Contact() {
                 </div>
                 <div className="flex flex-col pt-0.5">
                   <span className="font-mono text-[10px] uppercase tracking-[2px] text-muted-foreground">ADDRESS</span>
-                  <span className="mt-1 font-sans text-[14px] font-medium text-foreground">123 Innovation Drive, San Francisco, CA</span>
+                  <span className="mt-1 font-sans text-[14px] font-medium text-foreground">{contactAddress}</span>
                 </div>
               </div>
 
-              {/* Item 2 */}
               <div className="flex items-start gap-3">
                 <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-[10px] bg-primary/[0.08]">
                   <Phone size={18} strokeWidth={1.5} className="text-primary" />
                 </div>
                 <div className="flex flex-col pt-0.5">
                   <span className="font-mono text-[10px] uppercase tracking-[2px] text-muted-foreground">PHONE</span>
-                  <span className="mt-1 font-sans text-[14px] font-medium text-foreground">+1 (555) 123-4567</span>
+                  <span className="mt-1 font-sans text-[14px] font-medium text-foreground">{contactPhone}</span>
                 </div>
               </div>
 
-              {/* Item 3 */}
               <div className="flex items-start gap-3">
                 <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-[10px] bg-primary/[0.08]">
                   <Mail size={18} strokeWidth={1.5} className="text-primary" />
                 </div>
                 <div className="flex flex-col pt-0.5">
                   <span className="font-mono text-[10px] uppercase tracking-[2px] text-muted-foreground">EMAIL</span>
-                  <span className="mt-1 font-sans text-[14px] font-medium text-foreground">hello@projectname.com</span>
+                  <span className="mt-1 font-sans text-[14px] font-medium text-foreground">{contactEmail}</span>
                 </div>
               </div>
             </div>
@@ -113,10 +158,10 @@ export function Contact() {
                     <CheckCircle2 size={36} className="text-primary" />
                   </div>
                   <h3 className="font-heading text-[20px] font-semibold text-foreground">
-                    Message sent!
+                    Inquiry Sent Successfully!
                   </h3>
                   <p className="mt-2 font-sans text-[14px] text-muted-foreground">
-                    We&apos;ll be in touch within 24 hours.
+                    Our guest services team will respond to your request within 24 hours.
                   </p>
                   <button
                     onClick={resetForm}
@@ -168,7 +213,7 @@ export function Contact() {
                         id="contact-phone"
                         name="phone"
                         type="tel"
-                        placeholder="+1 (555) ..."
+                        placeholder="+251 911 ..."
                         className="rounded-[8px] border border-border bg-background px-4 py-3 font-sans text-[15px] text-foreground placeholder:text-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/12"
                       />
                     </div>
@@ -183,11 +228,11 @@ export function Contact() {
                           className="w-full appearance-none rounded-[8px] border border-border bg-background px-4 py-3 font-sans text-[15px] text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/12"
                         >
                           <option value="" disabled>Select a subject</option>
-                          <option value="general">General Inquiry</option>
-                          <option value="sales">Sales</option>
-                          <option value="support">Technical Support</option>
-                          <option value="partnership">Partnership</option>
-                          <option value="other">Other</option>
+                          <option value="reservation">Reservation Inquiry</option>
+                          <option value="group">Group Booking & Events</option>
+                          <option value="shuttle">Airport Shuttle Request</option>
+                          <option value="assistance">Special Assistance Needs</option>
+                          <option value="other">Other Inquiry</option>
                         </select>
                         <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                       </div>
@@ -204,11 +249,15 @@ export function Contact() {
                       rows={4}
                       required
                       maxLength={2000}
-                      placeholder="Tell us about your project..."
+                      placeholder="Tell us details about your request or questions..."
                       className="resize-none rounded-[8px] border border-border bg-background px-4 py-3 font-sans text-[15px] text-foreground placeholder:text-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/12"
                     />
                     {errors.message && <p className="mt-1 font-sans text-[12px] text-destructive">{errors.message}</p>}
                   </div>
+
+                  {errors.form && (
+                    <p className="font-sans text-[13px] text-destructive">{errors.form}</p>
+                  )}
 
                   <button
                     type="submit"
@@ -218,10 +267,10 @@ export function Contact() {
                     {isSubmitting ? (
                       <>
                         <Loader2 size={18} className="mr-2 animate-spin" />
-                        Sending...
+                        Sending Inquiry...
                       </>
                     ) : (
-                      'Send Message →'
+                      'Send Inquiry →'
                     )}
                   </button>
                 </form>

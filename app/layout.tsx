@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Google_Sans, Funnel_Display, JetBrains_Mono } from "next/font/google";
+import { Inter, Funnel_Display, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -8,7 +8,7 @@ import "./globals.css";
    - fontDisplay: headings & display copy (font-display / font-heading)
    - fontMono:    eyebrows, labels, data (font-mono)
    ───────────────────────────────────────────────────────────────────────── */
-const fontSans = Google_Sans({
+const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -30,10 +30,26 @@ const fontMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Project Name",
-    template: "%s | Project Name",
+    default: "Eset Hotel | Luxury Stays in Addis Ababa",
+    template: "%s | Eset Hotel",
   },
-  description: "Project description goes here.",
+  description:
+    "Experience luxury and Ethiopian hospitality at Eset Hotel. Modern rooms, world-class amenities, and breathtaking views in the heart of Addis Ababa. Book your stay today.",
+  keywords: [
+    "Eset Hotel",
+    "Addis Ababa hotel",
+    "luxury hotel Ethiopia",
+    "boutique hotel",
+    "hotel booking",
+  ],
+  openGraph: {
+    title: "Eset Hotel — Luxury Stays in Addis Ababa",
+    description:
+      "Modern luxury meets Ethiopian warmth. Book direct for the best rates.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Eset Hotel",
+  },
 };
 
 export default function RootLayout({

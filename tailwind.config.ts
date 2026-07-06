@@ -67,6 +67,18 @@ const config: Config = {
         success: "hsl(var(--success) / <alpha-value>)",
         warning: "hsl(var(--warning) / <alpha-value>)",
         info: "hsl(var(--info) / <alpha-value>)",
+
+        // brand accent colors from the light luxury palette
+        brand: {
+          ivory: "hsl(var(--brand-ivory) / <alpha-value>)",
+          gold: "hsl(var(--brand-gold) / <alpha-value>)",
+          stone: "hsl(var(--brand-stone) / <alpha-value>)",
+          "warm-dark": "hsl(var(--brand-warm-dark) / <alpha-value>)",
+        },
+
+        // shorthand aliases for the most-used brand accents
+        gold: "hsl(var(--brand-gold) / <alpha-value>)",
+        ivory: "hsl(var(--brand-ivory) / <alpha-value>)",
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -2,36 +2,37 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useGSAP } from '@/lib/hooks/useGSAP'
+import { Logo } from '@/components/ui/logo'
 
 /* ─── Nav data ─── */
 const navLinks = [
-  { href: '#features', label: 'Features' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#testimonials', label: 'Testimonials' },
+  { href: '#rooms', label: 'Rooms' },
+  { href: '#amenities', label: 'Amenities' },
+  { href: '#gallery', label: 'Gallery' },
+  { href: '#testimonials', label: 'Reviews' },
   { href: '#contact', label: 'Contact' },
 ]
-
-/* ─── Logo (inline) ─── */
-function Logo({ variant }: { variant: 'onDark' | 'onLight' }) {
-  return (
-    <span className="font-display text-[20px] font-bold tracking-[-1.5px]">
-      <span className={variant === 'onLight' ? 'text-foreground' : 'text-white'}>
-        Project
-      </span>
-      <span className="text-primary">Name</span>
-    </span>
-  )
-}
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState<string | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+
+  /* ─── Fetch phone from settings ─── */
+  useEffect(() => {
+    fetch('/api/content/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.contactPhone) setPhoneNumber(data.contactPhone)
+      })
+      .catch(() => {})
+  }, [])
 
   /* ─── Scroll listener with rAF ─── */
   const handleScroll = useCallback(() => {
@@ -92,42 +93,57 @@ export function Navbar() {
         className={cn(
           'navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300',
           scrolled
-            ? 'bg-background/[0.88] border-b border-border backdrop-blur-[14px]'
+            ? 'bg-background/[0.92] border-b border-border backdrop-blur-[14px] shadow-sm'
             : 'bg-transparent border-b border-transparent'
         )}
       >
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-4 sm:px-6">
           {/* Logo — left */}
-          <Link href="/" className="inline-flex items-center">
-            <Logo variant="onLight" />
+          <Link href="/" className="inline-flex items-center" id="navbar-logo">
+            <Logo variant={scrolled ? 'onLight' : 'onDark'} />
           </Link>
 
           {/* Desktop nav — center */}
-          <nav className="hidden items-center gap-8 lg:flex">
+          <nav className="hidden items-center gap-8 lg:flex" id="navbar-desktop-nav">
             {navLinks.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="font-sans text-[14px] font-medium text-muted-foreground transition-colors hover:text-primary"
+                className={cn(
+                  'font-sans text-[14px] font-medium transition-colors',
+                  scrolled
+                    ? 'text-muted-foreground hover:text-primary'
+                    : 'text-white/80 hover:text-white'
+                )}
               >
                 {l.label}
               </Link>
             ))}
           </nav>
 
-          {/* Desktop auth — right */}
+          {/* Desktop actions — right */}
           <div className="hidden items-center gap-3 lg:flex">
+            {phoneNumber && (
+              <a
+                href={`tel:${phoneNumber.replace(/\s/g, '')}`}
+                className={cn(
+                  'flex items-center gap-2 rounded-md px-3 py-2 font-sans text-[13px] font-medium transition-colors',
+                  scrolled
+                    ? 'text-muted-foreground hover:text-primary'
+                    : 'text-white/70 hover:text-white'
+                )}
+                id="navbar-phone"
+              >
+                <Phone size={14} strokeWidth={1.5} />
+                {phoneNumber}
+              </a>
+            )}
             <Link
-              href="/login"
-              className="rounded-md px-4 py-2 font-sans text-[14px] font-medium text-foreground transition-colors hover:text-primary"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
+              href="#booking-bar"
               className="btn-primary"
+              id="navbar-book-now"
             >
-              Get Started
+              Book Now
             </Link>
           </div>
 
@@ -136,8 +152,9 @@ export function Navbar() {
             onClick={() => setIsMenuOpen(true)}
             className="flex items-center justify-center lg:hidden h-11 w-11 rounded-md"
             aria-label="Open menu"
+            id="navbar-mobile-toggle"
           >
-            <Menu className="h-6 w-6 text-foreground transition-colors" />
+            <Menu className={cn('h-6 w-6 transition-colors', scrolled ? 'text-foreground' : 'text-white')} />
           </button>
         </div>
       </header>
@@ -149,7 +166,7 @@ export function Navbar() {
           className="mobile-overlay fixed inset-0 z-[60] flex flex-col bg-ink"
         >
           {/* Top bar */}
-          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+          <div className="flex h-[72px] items-center justify-between px-4 sm:px-6">
             <Logo variant="onDark" />
             <button
               onClick={() => setIsMenuOpen(false)}
@@ -176,19 +193,22 @@ export function Navbar() {
 
           {/* Bottom — CTA */}
           <div className="mobile-menu-footer flex flex-col gap-3 px-8 pb-10">
+            {phoneNumber && (
+              <a
+                href={`tel:${phoneNumber.replace(/\s/g, '')}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="flex h-12 items-center justify-center gap-2 rounded-[6px] border border-white/20 font-sans text-[15px] font-medium text-white transition-colors hover:border-white/60 hover:bg-white/5"
+              >
+                <Phone size={16} />
+                Call Us
+              </a>
+            )}
             <Link
-              href="/login"
-              onClick={() => setIsMenuOpen(false)}
-              className="flex h-12 items-center justify-center rounded-[6px] border border-white/20 font-sans text-[15px] font-medium text-white transition-colors hover:border-white/60 hover:bg-white/5"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
+              href="#booking-bar"
               onClick={() => setIsMenuOpen(false)}
               className="flex h-12 items-center justify-center rounded-[6px] bg-primary font-sans text-[13px] font-semibold text-primary-foreground transition-all hover:bg-primary-dark"
             >
-              Get Started
+              Book Your Stay
             </Link>
           </div>
         </div>
