@@ -12,6 +12,8 @@ import { Contact } from '@/components/landing/Contact'
 import { Footer } from '@/components/landing/Footer'
 import { ScrollAnimations } from '@/components/landing/ScrollAnimations'
 
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   return (
     <>
