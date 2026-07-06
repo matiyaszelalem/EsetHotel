@@ -22,9 +22,14 @@ const fallbackAmenities = [
 ]
 
 export async function Amenities() {
-  const amenitiesData = await query<{
-    id: string; name: string; icon: string | null
-  }>('SELECT id, name, icon FROM amenity WHERE active = true ORDER BY sort_order ASC')
+  let amenitiesData: { id: string; name: string; icon: string | null }[]
+  try {
+    amenitiesData = await query<{
+      id: string; name: string; icon: string | null
+    }>('SELECT id, name, icon FROM amenity WHERE active = true ORDER BY sort_order ASC')
+  } catch {
+    amenitiesData = fallbackAmenities
+  }
 
   const displayAmenities = amenitiesData.length === 0 ? fallbackAmenities : amenitiesData
 

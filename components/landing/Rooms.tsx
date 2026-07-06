@@ -72,15 +72,30 @@ const fallbackRoomTypes = [
 ]
 
 export async function Rooms() {
-  const roomTypes = await query<{
-    id: string; slug: string; name: string; description: string | null
-    base_price: number; capacity: number; bed_config: string | null
-    amenities: string; images: string
-  }>('SELECT * FROM room_type ORDER BY base_price ASC')
+  let roomTypes: (typeof fallbackRoomTypes[number])[]
+  try {
+    const rows = await query<{
+      id: string; slug: string; name: string; description: string | null
+      base_price: number; capacity: number; bed_config: string | null
+      amenities: string | null; images: string | null
+    }>('SELECT * FROM room_type ORDER BY base_price ASC')
+    roomTypes = rows.length > 0
+      ? rows.map(r => ({
+          id: r.id, slug: r.slug, name: r.name,
+          description: r.description ?? '',
+          base_price: r.base_price, capacity: r.capacity,
+          bed_config: r.bed_config ?? 'King Bed',
+          amenities: r.amenities ?? '[]',
+          images: r.images ?? '[]',
+        }))
+      : fallbackRoomTypes
+  } catch {
+    roomTypes = fallbackRoomTypes
+  }
 
   const etbRate = await getEtbRate()
 
-  const displayRooms = roomTypes.length === 0 ? fallbackRoomTypes : roomTypes
+  const displayRooms = roomTypes
 
   const featuredRoomId = displayRooms.reduce((prev, curr) =>
     curr.base_price > prev.base_price ? curr : prev

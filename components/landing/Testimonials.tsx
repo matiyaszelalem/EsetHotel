@@ -2,9 +2,14 @@ import { Star } from 'lucide-react'
 import { query } from '@/lib/db'
 
 export async function Testimonials() {
-  const dbTestimonials = await query<{
-    id: string; guest_name: string; comment: string; rating: number
-  }>('SELECT id, guest_name, comment, rating FROM testimonial WHERE active = true ORDER BY sort_order ASC')
+  let dbTestimonials: { id: string; guest_name: string; comment: string; rating: number }[]
+  try {
+    dbTestimonials = await query<{
+      id: string; guest_name: string; comment: string; rating: number
+    }>('SELECT id, guest_name, comment, rating FROM testimonial WHERE active = true ORDER BY sort_order ASC')
+  } catch {
+    dbTestimonials = []
+  }
 
   const fallbackTestimonials = [
     {

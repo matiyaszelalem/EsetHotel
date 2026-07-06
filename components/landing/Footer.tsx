@@ -63,9 +63,14 @@ const policyLinks = [
 export async function Footer() {
   const currentYear = new Date().getFullYear()
 
-  const settings = await queryOne<{ address: string | null }>(
-    'SELECT address FROM hotel_settings LIMIT 1'
-  )
+  let settings: { address: string | null } | null
+  try {
+    settings = await queryOne<{ address: string | null }>(
+      'SELECT address FROM hotel_settings LIMIT 1'
+    )
+  } catch {
+    settings = null
+  }
   const hotelAddress = settings?.address || 'Bole Road, Addis Ababa, Ethiopia'
 
   return (

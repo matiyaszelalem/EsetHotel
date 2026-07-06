@@ -7,15 +7,29 @@ interface NearbyAttraction {
 }
 
 export async function Location() {
-  const settings = await queryOne<{
+  let settings: {
     address: string | null
     checkin_time: string
     checkout_time: string
-  }>('SELECT address, checkin_time, checkout_time FROM hotel_settings LIMIT 1')
+  } | null
+  try {
+    settings = await queryOne<{
+      address: string | null
+      checkin_time: string
+      checkout_time: string
+    }>('SELECT address, checkin_time, checkout_time FROM hotel_settings LIMIT 1')
+  } catch {
+    settings = null
+  }
 
-  const nearbyRows = await query<{ name: string; distance: string }>(
-    'SELECT name, distance FROM nearby_attraction WHERE active = true ORDER BY sort_order ASC'
-  )
+  let nearbyRows: { name: string; distance: string }[]
+  try {
+    nearbyRows = await query<{ name: string; distance: string }>(
+      'SELECT name, distance FROM nearby_attraction WHERE active = true ORDER BY sort_order ASC'
+    )
+  } catch {
+    nearbyRows = []
+  }
 
   const nearbyAttractions: NearbyAttraction[] = nearbyRows.length > 0 ? nearbyRows.map(r => ({
     name: r.name,

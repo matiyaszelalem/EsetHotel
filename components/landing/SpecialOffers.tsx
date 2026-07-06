@@ -8,9 +8,14 @@ const offerIcons = [Clock, Percent, Heart]
 const fallbackOfferImages = ['/images/seasonal-offer.png', '/images/spa-package.png']
 
 export async function SpecialOffers() {
-  const dbOffers = await query<{
-    id: string; title: string; description: string; discount: string | null
-  }>('SELECT id, title, description, discount FROM special_offer WHERE active = true ORDER BY sort_order ASC')
+  let dbOffers: { id: string; title: string; description: string; discount: string | null }[]
+  try {
+    dbOffers = await query<{
+      id: string; title: string; description: string; discount: string | null
+    }>('SELECT id, title, description, discount FROM special_offer WHERE active = true ORDER BY sort_order ASC')
+  } catch {
+    dbOffers = []
+  }
 
   const fallbackOffers = [
     {
