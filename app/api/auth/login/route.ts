@@ -1,7 +1,9 @@
 import { compare } from 'bcryptjs'
 import { NextResponse } from 'next/server'
-import { queryOne } from '@/lib/db'
+import { queryOne, testConnection } from '@/lib/db'
 import { signToken } from '@/lib/auth'
+
+export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
   try {
@@ -10,6 +12,13 @@ export async function POST(req: Request) {
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Missing email or password' }, { status: 400 })
+    }
+
+    const dbOk = await testConnection()
+    if (!dbOk) {
+      return NextResponse.json({
+        error: 'Database connection failed. Check that DATABASE_URL is set correctly on Vercel.',
+      }, { status: 500 })
     }
 
     const user = await queryOne<{
@@ -41,7 +50,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Error in login:', error)
     const isDebug = process.env.SERVER_DEBUG === 'true' || process.env.NEXT_PUBLIC_DEBUG === 'true'
-    const message = isDebug ? error?.message || 'Internal Server Error' : 'Internal Server Error'
+    const message = isDebug ? error?.message || 'Internal Server Error' : 'Database connection failed. Check that DATABASE_URL is set correctly on Vercel. Set SERVER_DEBUG=true to see the full error.'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
