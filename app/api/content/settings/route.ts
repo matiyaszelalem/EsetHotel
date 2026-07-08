@@ -17,7 +17,7 @@ export async function GET() {
       return NextResponse.json(null)
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       hotelName: settings.hotel_name,
       address: settings.address,
       contactEmail: settings.contact_email,
@@ -26,6 +26,8 @@ export async function GET() {
       checkinTime: settings.checkin_time,
       checkoutTime: settings.checkout_time,
     })
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    return response
   } catch (error: any) {
     console.error('Error fetching settings:', error)
     return NextResponse.json(null)

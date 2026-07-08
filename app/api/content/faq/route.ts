@@ -6,7 +6,9 @@ export async function GET() {
     const faqEntries = await query(
       'SELECT * FROM faq_entry WHERE active = true ORDER BY sort_order ASC'
     )
-    return NextResponse.json(faqEntries)
+    const response = NextResponse.json(faqEntries)
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    return response
   } catch (error: any) {
     console.error('Error fetching FAQ entries:', error)
     return NextResponse.json([])

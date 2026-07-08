@@ -63,7 +63,9 @@ export async function GET() {
       ? images.map((item, index) => normalizeGalleryItem(item as Record<string, unknown>, index))
       : []
 
-    return NextResponse.json(sanitized)
+    const response = NextResponse.json(sanitized)
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    return response
   } catch (error: any) {
     console.error('Error fetching gallery images:', error)
     return NextResponse.json([])

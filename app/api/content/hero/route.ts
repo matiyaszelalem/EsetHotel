@@ -52,7 +52,9 @@ export async function GET() {
       return NextResponse.json(null)
     }
 
-    return NextResponse.json(sanitizeHeroContent(parsed as Record<string, unknown>))
+    const response = NextResponse.json(sanitizeHeroContent(parsed as Record<string, unknown>))
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    return response
   } catch (error: any) {
     console.error('Error fetching hero content:', error)
     return NextResponse.json(null)

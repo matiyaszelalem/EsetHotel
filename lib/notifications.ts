@@ -20,7 +20,10 @@ const TYPE_ICONS: Record<string, string> = {
   CHANNEL_SYNC: 'RefreshCw',
 }
 
+let notificationTableInitialized = false
+
 export async function ensureNotificationTable() {
+  if (notificationTableInitialized) return
   await query(`
     CREATE TABLE IF NOT EXISTS notification (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -32,6 +35,7 @@ export async function ensureNotificationTable() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `)
+  notificationTableInitialized = true
 }
 
 export async function createNotification(
