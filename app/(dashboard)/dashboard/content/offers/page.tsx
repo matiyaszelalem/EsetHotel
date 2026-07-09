@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Trash2, AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface SpecialOffer {
   id: string
@@ -16,6 +17,7 @@ interface SpecialOffer {
 }
 
 export default function OffersManagement() {
+  const { confirm, dialog } = useConfirm()
   const [offers, setOffers] = useState<SpecialOffer[]>([])
   const [promos, setPromos] = useState<{id: string, code: string}[]>([])
   const [loading, setLoading] = useState(true)
@@ -118,7 +120,7 @@ export default function OffersManagement() {
   }
 
   const handleDeleteOffer = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this offer?')) return
+    if (!await confirm('Are you sure you want to delete this offer?')) return
     try {
       const res = await fetch(`/api/dashboard/content/offers?id=${id}`, {
         method: 'DELETE',
@@ -354,6 +356,7 @@ export default function OffersManagement() {
           </div>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

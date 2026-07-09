@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDualPriceCompact, fetchEtbRate } from '@/lib/dual-pricing'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface RoomType {
   id: string
@@ -54,6 +55,7 @@ interface Booking {
 }
 
 export default function BookingsManagement() {
+  const { confirm, dialog } = useConfirm()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([])
   const [loading, setLoading] = useState(true)
@@ -83,7 +85,7 @@ export default function BookingsManagement() {
     checkOut: '',
     guests: '1',
     roomTypeId: '',
-    paymentMethod: 'PAY_AT_HOTEL',
+    paymentMethod: 'hotel',
     paymentStatus: 'PENDING',
     source: 'WALK_IN',
   })
@@ -158,7 +160,7 @@ export default function BookingsManagement() {
         checkOut: '',
         guests: '1',
         roomTypeId: roomTypes[0]?.id || '',
-        paymentMethod: 'PAY_AT_HOTEL',
+        paymentMethod: 'hotel',
         paymentStatus: 'PENDING',
         source: 'WALK_IN',
       })
@@ -210,6 +212,7 @@ export default function BookingsManagement() {
   }
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
@@ -406,8 +409,8 @@ export default function BookingsManagement() {
                           )}
                           {['CONFIRMED', 'PENDING'].includes(booking.status) && (
                             <button
-                              onClick={() => {
-                                if (confirm('Are you sure you want to cancel this booking?')) {
+                              onClick={async () => {
+                                if (await confirm('Are you sure you want to cancel this booking?')) {
                                   handleUpdateStatus(booking.id, 'CANCELLED')
                                 }
                               }}
@@ -497,7 +500,7 @@ export default function BookingsManagement() {
                         </button>
                       )}
                       {['CONFIRMED', 'PENDING'].includes(booking.status) && (
-                        <button onClick={() => { if (confirm('Cancel this booking?')) handleUpdateStatus(booking.id, 'CANCELLED') }} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors" title="Cancel">
+                        <button onClick={async () => { if (await confirm('Cancel this booking?')) handleUpdateStatus(booking.id, 'CANCELLED') }} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors" title="Cancel">
                           <X size={14} />
                         </button>
                       )}
@@ -698,5 +701,7 @@ export default function BookingsManagement() {
         </div>
       )}
     </div>
+      {dialog}
+    </>
   )
 }

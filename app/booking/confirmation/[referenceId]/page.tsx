@@ -56,8 +56,8 @@ export default async function BookingConfirmationPage({
   const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
   const roomInfo = bookingRooms[0]
   const etbRate = await getEtbRate()
-  const subtotal = roomInfo ? nights * roomInfo.room_type_base_price : booking.total_price / 1.15
-  const taxes = booking.total_price - subtotal
+  const subtotal = roomInfo ? nights * roomInfo.room_type_base_price : parseFloat((booking.total_price / 1.15).toFixed(2))
+  const taxes = parseFloat((booking.total_price - subtotal).toFixed(2))
 
   return (
     <div className="min-h-screen bg-background pt-32 pb-24">
@@ -141,7 +141,7 @@ export default async function BookingConfirmationPage({
               </div>
               <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t border-border/30">
                 <span>Payment Method</span>
-                <span>{booking.payment_method === 'STRIPE' ? 'Online (Stripe)' : 'Pay at Hotel'}</span>
+                <span>{booking.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'Pay at Hotel'}</span>
               </div>
               {payment && (
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">

@@ -127,16 +127,16 @@ export async function POST(req: Request) {
         await transaction(async (tx) => {
           await tx.execute(
             `INSERT INTO booking
-               (reference_id, external_uid, guest_name, guest_email, check_in, check_out,
-                status, payment_method, source, total_price, currency, created_at, updated_at)
-             VALUES
-               ($1, $2, 'OTA Guest', '', $3, $4,
-                'CONFIRMED', 'PAY_AT_HOTEL', 'OTA', 0, 'USD', NOW(), NOW())
-             ON CONFLICT (external_uid) DO UPDATE
-               SET check_in   = EXCLUDED.check_in,
-                   check_out  = EXCLUDED.check_out,
-                   updated_at = NOW()`,
-            [`OTA-${event.uid}`, event.uid, dtStart.toISOString(), dtEnd.toISOString()]
+                (reference_id, external_uid, guest_name, guest_email, check_in, check_out,
+                 status, payment_method, source, total_price, currency, created_at, updated_at)
+              VALUES
+                ($1, $2, 'OTA Guest', '', $3, $4,
+                 'CONFIRMED', 'PAY_AT_HOTEL', 'OTA', 0, 'USD', NOW(), NOW())
+              ON CONFLICT (external_uid) DO UPDATE
+                SET check_in   = EXCLUDED.check_in,
+                    check_out  = EXCLUDED.check_out,
+                    updated_at = NOW()`,
+             [`OTA-${event.uid}`, event.uid, dtStart.toISOString(), dtEnd.toISOString()]
           )
         })
         updatedCount++
@@ -181,12 +181,12 @@ export async function POST(req: Request) {
       await transaction(async (tx) => {
         const booking = await tx.queryOne<{ id: string }>(
           `INSERT INTO booking
-             (reference_id, external_uid, guest_name, guest_email, check_in, check_out,
-              status, payment_method, source, total_price, currency, created_at, updated_at)
-           VALUES
-             ($1, $2, 'OTA Guest', '', $3, $4,
-              'CONFIRMED', 'PAY_AT_HOTEL', 'OTA', 0, 'USD', NOW(), NOW())
-           ON CONFLICT (external_uid) DO UPDATE
+              (reference_id, external_uid, guest_name, guest_email, check_in, check_out,
+               status, payment_method, source, total_price, currency, created_at, updated_at)
+            VALUES
+              ($1, $2, 'OTA Guest', '', $3, $4,
+                'CONFIRMED', 'PAY_AT_HOTEL', 'OTA', 0, 'USD', NOW(), NOW())
+            ON CONFLICT (external_uid) DO UPDATE
              SET check_in   = EXCLUDED.check_in,
                  check_out  = EXCLUDED.check_out,
                  updated_at = NOW()

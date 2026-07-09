@@ -20,6 +20,7 @@ import {
   ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface BookingRoom {
   room: {
@@ -65,6 +66,7 @@ interface PendingVerification {
 }
 
 export default function FrontDeskToday() {
+  const { confirm, dialog } = useConfirm()
   const [arrivals, setArrivals] = useState<Booking[]>([])
   const [departures, setDepartures] = useState<Booking[]>([])
   const [pendingVerifications, setPendingVerifications] = useState<PendingVerification[]>([])
@@ -234,8 +236,8 @@ export default function FrontDeskToday() {
                     Confirm Payment
                   </button>
                   <button
-                    onClick={() => {
-                      if (confirm(`Reject payment from ${pv.guestName}? This will cancel the reservation.`)) {
+                    onClick={async () => {
+                      if (await confirm(`Reject payment from ${pv.guestName}? This will cancel the reservation.`)) {
                         handleVerifyPayment(pv.paymentId, 'REJECT')
                       }
                     }}
@@ -334,8 +336,8 @@ export default function FrontDeskToday() {
                         </button>
                         {['CONFIRMED', 'PENDING'].includes(booking.status) && (
                           <button
-                            onClick={() => {
-                              if (confirm(`Mark ${booking.guestName} as NO-SHOW? This will cancel the reservation and release the room.`)) {
+                            onClick={async () => {
+                              if (await confirm(`Mark ${booking.guestName} as NO-SHOW? This will cancel the reservation and release the room.`)) {
                                 handleUpdateStatus(booking.id, 'NO_SHOW')
                               }
                             }}
@@ -433,6 +435,7 @@ export default function FrontDeskToday() {
         </div>
 
       </div>
+      {dialog}
     </div>
   )
 }

@@ -237,7 +237,7 @@ export class ChannelManager {
           `INSERT INTO booking (reference_id, guest_name, guest_email, guest_phone,
             special_requests, check_in, check_out, guests, status, payment_method,
             total_price, currency, source)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'CONFIRMED', 'PAY_AT_HOTEL', $9, $10, 'OTA')
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'CONFIRMED', 'hotel', $9, $10, 'OTA')
            RETURNING id`,
           [
             refId,

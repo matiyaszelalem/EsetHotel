@@ -110,15 +110,15 @@ export async function POST(req: Request) {
 
     const booking = await queryOne<{ id: string; reference_id: string; guest_name: string; check_in: string; check_out: string; total_price: string }>(
       `INSERT INTO booking (reference_id, guest_name, guest_email, guest_phone, check_in, check_out,
-        status, total_price, payment_method, source, special_requests, guest_count)
+        status, total_price, payment_method, source, special_requests, guests)
        VALUES ($1, $2, $3, $4, $5::date, $6::date, 'CONFIRMED', $7, $8, $9, $10, $11)
        RETURNING id, reference_id, guest_name, check_in, check_out, total_price`,
       [referenceId, guestName, guestEmail, guestPhone || null, checkIn, checkOut, totalPrice, paymentMethod, source || 'WALK_IN', specialRequests || null, parseInt(guests || '1')]
     )
 
     await query(
-      `INSERT INTO booking_room (booking_id, room_id) VALUES ($1, $2)`,
-      [booking!.id, available.id]
+      'INSERT INTO booking_room (booking_id, room_id, price_per_night) VALUES ($1, $2, $3)',
+      [booking!.id, available.id, parseFloat(rt?.base_price || '0')]
     )
 
     await query(
@@ -150,15 +150,13 @@ export async function PATCH(req: Request) {
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 
     const body = await req.json()
-    const { status, checkedInAt, checkedOutAt } = body
+    const { status } = body
 
     const updates: string[] = []
     const params: any[] = []
     let idx = 1
 
     if (status) { updates.push(`status = $${idx++}`); params.push(status) }
-    if (checkedInAt) { updates.push(`checked_in_at = $${idx++}`); params.push(checkedInAt) }
-    if (checkedOutAt) { updates.push(`checked_out_at = $${idx++}`); params.push(checkedOutAt) }
 
     if (updates.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
 
@@ -169,7 +167,7 @@ export async function PATCH(req: Request) {
       await query(`UPDATE payment SET status = $1 WHERE booking_id = $2`, [body.paymentStatus, id])
     }
 
-    if (status === 'CHECKED_OUT') {
+    if (status === 'CHECKED_OUT' || status === 'CANCELLED' || status === 'NO_SHOW') {
       await query(
         `UPDATE room SET status = 'AVAILABLE' WHERE id IN (
            SELECT room_id FROM booking_room WHERE booking_id = $1

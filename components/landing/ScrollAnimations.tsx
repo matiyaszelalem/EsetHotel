@@ -14,21 +14,7 @@ export function ScrollAnimations() {
     }
 
     const revealAllContent = () => {
-      const heroTargets = [
-        '.hero-eyebrow',
-        '.hero-headline',
-        '.hero-body',
-        '.hero-booking-widget',
-        '.hero-stats span',
-        '.hero-scroll',
-      ].join(',')
-
       gsap.set('.gsap-reveal, .animate-cards .card, .card-base, .card-dark', {
-        opacity: 1,
-        y: 0,
-        clearProps: 'all',
-      })
-      gsap.set(heroTargets, {
         opacity: 1,
         y: 0,
         clearProps: 'all',

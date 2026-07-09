@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, CheckCircle2, CreditCard, Hotel, Building2, Tag, Loader2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Hotel, Building2, Tag, Loader2, AlertCircle } from 'lucide-react'
 
 const roomImageMap: Record<string, string> = {
   'standard-room': '/images/standard-room.png',
@@ -12,7 +12,7 @@ const roomImageMap: Record<string, string> = {
   'family-room': '/images/family-room.png',
   'presidential-suite': '/images/presidential-suite.png',
 }
-import { formatDualPrice, formatDualPriceCompact, fetchEtbRate } from '@/lib/dual-pricing'
+import { formatDualPriceCompact, fetchEtbRate } from '@/lib/dual-pricing'
 import { z } from 'zod'
 
 const dateSchema = z.object({
@@ -72,7 +72,7 @@ function CheckoutContent() {
   const [promoLoading, setPromoLoading] = useState(false)
   const [appliedPromo, setAppliedPromo] = useState<any>(null) // { id, code, discountAmount }
 
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'hotel' | 'bank_transfer'>('stripe')
+  const [paymentMethod, setPaymentMethod] = useState<'PAY_AT_HOTEL' | 'bank_transfer'>('PAY_AT_HOTEL')
   const [verificationMethod, setVerificationMethod] = useState<'TRANSACTION_ID' | 'PAYMENT_LINK'>('TRANSACTION_ID')
   const [verificationData, setVerificationData] = useState('')
   const [etbRate, setEtbRate] = useState(120)
@@ -92,7 +92,7 @@ function CheckoutContent() {
   useEffect(() => {
     const fetchRoomDetails = async () => {
       try {
-        const res = await fetch('/api/dashboard/room-types')
+        const res = await fetch('/api/room-types')
         if (res.ok) {
           const roomTypes = await res.json()
           const matched = roomTypes.find((r: any) => r.slug === roomSlug)
@@ -252,22 +252,9 @@ function CheckoutContent() {
                 <h2 className="font-heading text-xl font-semibold text-foreground mb-6 border-b border-border/50 pb-4">Payment Method</h2>
                 
                 <div className="space-y-4">
-                  <label className={`flex cursor-pointer items-start gap-4 rounded-[12px] border p-4 transition-colors ${paymentMethod === 'stripe' ? 'border-primary bg-primary/[0.02]' : 'border-border bg-background hover:border-primary/50'}`}>
+                  <label onClick={() => setPaymentMethod('PAY_AT_HOTEL')} className={`flex cursor-pointer items-start gap-4 rounded-[12px] border p-4 transition-colors ${paymentMethod === 'PAY_AT_HOTEL' ? 'border-primary bg-primary/[0.02]' : 'border-border bg-background hover:border-primary/50'}`}>
                     <div className="mt-1 flex h-5 w-5 items-center justify-center rounded-full border border-primary">
-                      {paymentMethod === 'stripe' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 font-medium text-foreground mb-1">
-                        <CreditCard size={18} className="text-primary" />
-                        Pay Online (Stripe)
-                      </div>
-                      <p className="text-sm text-muted-foreground">Securely pay now to guarantee your reservation. We accept all major credit cards.</p>
-                    </div>
-                  </label>
-
-                  <label className={`flex cursor-pointer items-start gap-4 rounded-[12px] border p-4 transition-colors ${paymentMethod === 'hotel' ? 'border-primary bg-primary/[0.02]' : 'border-border bg-background hover:border-primary/50'}`}>
-                    <div className="mt-1 flex h-5 w-5 items-center justify-center rounded-full border border-primary">
-                      {paymentMethod === 'hotel' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
+                      {paymentMethod === 'PAY_AT_HOTEL' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 font-medium text-foreground mb-1">
@@ -278,7 +265,7 @@ function CheckoutContent() {
                     </div>
                   </label>
 
-                  <label className={`flex cursor-pointer items-start gap-4 rounded-[12px] border p-4 transition-colors ${paymentMethod === 'bank_transfer' ? 'border-primary bg-primary/[0.02]' : 'border-border bg-background hover:border-primary/50'}`}>
+                  <label onClick={() => setPaymentMethod('bank_transfer')} className={`flex cursor-pointer items-start gap-4 rounded-[12px] border p-4 transition-colors ${paymentMethod === 'bank_transfer' ? 'border-primary bg-primary/[0.02]' : 'border-border bg-background hover:border-primary/50'}`}>
                     <div className="mt-1 flex h-5 w-5 items-center justify-center rounded-full border border-primary">
                       {paymentMethod === 'bank_transfer' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
                     </div>
@@ -437,7 +424,7 @@ function CheckoutContent() {
                 ) : (
                   <span className="flex items-center gap-2">
                     <CheckCircle2 size={18} />
-                    {paymentMethod === 'stripe' ? 'Pay & Book Now' : paymentMethod === 'bank_transfer' ? 'Submit for Verification' : 'Confirm Reservation'}
+                    {paymentMethod === 'bank_transfer' ? 'Submit for Verification' : 'Confirm Reservation'}
                   </span>
                 )}
               </button>

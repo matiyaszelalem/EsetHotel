@@ -17,6 +17,7 @@ import {
   Edit,
   Calendar,
 } from 'lucide-react'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface User {
   id: string
@@ -33,6 +34,7 @@ const ROLES = ['STAFF', 'ADMIN', 'SUPER_ADMIN']
 
 export default function UsersManagement() {
   const router = useRouter()
+  const { confirm, dialog } = useConfirm()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -123,7 +125,7 @@ export default function UsersManagement() {
   }
 
   const handleDelete = async (user: User) => {
-    if (!confirm(`Delete ${user.name} (${user.email})? This cannot be undone.`)) return
+    if (!await confirm(`Delete ${user.name} (${user.email})? This cannot be undone.`)) return
     try {
       const res = await fetch(`/api/dashboard/users?id=${user.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete user')
@@ -331,6 +333,7 @@ export default function UsersManagement() {
           </div>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

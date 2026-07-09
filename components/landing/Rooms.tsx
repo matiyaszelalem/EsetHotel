@@ -125,10 +125,10 @@ export async function Rooms() {
             return (
               <div
                 key={room.id}
-                className={`card card-base group overflow-hidden ${isFeatured ? 'sm:col-span-2 sm:grid sm:grid-cols-2' : ''}`}
+                className="card card-base group overflow-hidden"
                 id={`room-card-${room.slug}`}
               >
-                <div className={`relative overflow-hidden ${isFeatured ? 'h-[240px] sm:h-full' : 'h-[240px]'}`}>
+                <div className="relative overflow-hidden h-[240px]">
                   <Image
                     src={roomImage(room.slug)}
                     alt={room.name}
@@ -197,9 +197,13 @@ export async function Rooms() {
                     >
                       Book Now →
                     </Link>
-                    <button className="btn-ghost" id={`room-details-${room.slug}`}>
+                    <Link
+                      href={`/booking/${room.slug}`}
+                      className="btn-ghost"
+                      id={`room-details-${room.slug}`}
+                    >
                       Details
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

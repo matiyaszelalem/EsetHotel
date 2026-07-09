@@ -12,6 +12,7 @@ import {
   ToggleLeft,
   ToggleRight
 } from 'lucide-react'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface PromoCode {
   id: string
@@ -27,6 +28,7 @@ interface PromoCode {
 }
 
 export default function PromosManagement() {
+  const { confirm, dialog } = useConfirm()
   const [promos, setPromos] = useState<PromoCode[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -119,7 +121,7 @@ export default function PromosManagement() {
   }
 
   const handleDeletePromo = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this promo code?')) return
+    if (!(await confirm('Are you sure you want to delete this promo code?'))) return
     try {
       const res = await fetch(`/api/dashboard/promos?id=${id}`, {
         method: 'DELETE',
@@ -357,6 +359,7 @@ export default function PromosManagement() {
           </div>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

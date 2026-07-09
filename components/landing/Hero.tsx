@@ -101,31 +101,32 @@ function HeroInner() {
 
   useGSAP(
     (gsap) => {
-      if (!container.current || !heroContent) return
+      if (!container.current) return
+
+      gsap.set('.hero-eyebrow', { y: 18 })
+      gsap.set('.hero-headline', { y: 28 })
+      gsap.set('.hero-body', { y: 18 })
+      gsap.set('.hero-booking-widget', { y: 24 })
+      gsap.set('.hero-stats span', { y: 10 })
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
-      tl.fromTo('.hero-eyebrow',
-        { y: 18, opacity: 0 },
+      tl.to('.hero-eyebrow',
         { y: 0, opacity: 1, duration: 0.45 }
       )
-      .fromTo('.hero-headline',
-        { y: 28, opacity: 0 },
+      .to('.hero-headline',
         { y: 0, opacity: 1, duration: 0.60 },
         '-=0.28'
       )
-      .fromTo('.hero-body',
-        { y: 18, opacity: 0 },
+      .to('.hero-body',
         { y: 0, opacity: 1, duration: 0.45 },
         '-=0.35'
       )
-      .fromTo('.hero-booking-widget',
-        { y: 24, opacity: 0 },
+      .to('.hero-booking-widget',
         { y: 0, opacity: 1, duration: 0.50 },
         '-=0.25'
       )
-      .fromTo('.hero-stats span',
-        { y: 10, opacity: 0 },
+      .to('.hero-stats span',
         { y: 0, opacity: 1, duration: 0.35, stagger: 0.08 },
         '-=0.25'
       )
@@ -154,13 +155,12 @@ function HeroInner() {
         { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.1 }
       )
 
-      tl.fromTo('.hero-scroll',
-        { opacity: 0 },
+      tl.to('.hero-scroll',
         { opacity: 1, duration: 0.35 },
         '-=0.20'
       )
     },
-    [heroContent]
+    []
   )
 
   return (
@@ -194,19 +194,19 @@ function HeroInner() {
 
         <div className="flex w-full flex-col items-center text-center">
 
-          <span className="hero-eyebrow mb-5 inline-block rounded-full border border-white/20 bg-white/[0.08] px-5 py-2 font-mono text-[10px] uppercase tracking-[4px] text-white/80 backdrop-blur-sm">
+          <span className="hero-eyebrow mb-5 inline-block rounded-full border border-white/20 bg-white/[0.08] px-5 py-2 font-mono text-[10px] uppercase tracking-[4px] text-white/80 backdrop-blur-sm" style={{ opacity: 0 }}>
             {heroContent.eyebrow}
           </span>
 
-          <h1 className="hero-headline mb-6 font-display font-bold leading-[0.95] tracking-[-3px] text-white" style={{ fontSize: 'clamp(38px, 7vw, 82px)' }}>
+          <h1 className="hero-headline mb-6 font-display font-bold leading-[0.95] tracking-[-3px] text-white" style={{ fontSize: 'clamp(38px, 7vw, 82px)', opacity: 0 }}>
             {heroContent.title}<span className="text-primary-light">.</span>
           </h1>
 
-          <p className="hero-body mx-auto mb-10 max-w-[560px] font-sans text-[16px] leading-[1.8] text-white/70 sm:text-[18px]">
+          <p className="hero-body mx-auto mb-10 max-w-[560px] font-sans text-[16px] leading-[1.8] text-white/70 sm:text-[18px]" style={{ opacity: 0 }}>
             {heroContent.subtitle}
           </p>
 
-          <div className="hero-booking-widget w-full max-w-[800px]" id="booking-bar">
+          <div className="hero-booking-widget w-full max-w-[800px]" id="booking-bar" style={{ opacity: 0 }}>
             <div className="rounded-[16px] border border-white/10 bg-white/[0.08] p-3 backdrop-blur-xl sm:p-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
                 <div className="flex flex-col rounded-[10px] bg-white/[0.08] px-4 py-3 transition-colors hover:bg-white/[0.12]">
@@ -280,7 +280,7 @@ function HeroInner() {
         </div>
       </div>
 
-      <div className="hero-scroll absolute bottom-[28px] left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-0 z-20">
+      <div className="hero-scroll absolute bottom-[28px] left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 z-20" style={{ opacity: 0 }}>
         <div className="h-[40px] w-px animate-pulse bg-white/40" />
         <span className="font-mono text-[8px] uppercase tracking-[3px] text-white/30">Explore</span>
       </div>

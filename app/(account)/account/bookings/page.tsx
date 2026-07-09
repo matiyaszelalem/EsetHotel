@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { generateInvoice } from '@/lib/pdf'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface BookingRoom {
   room: {
@@ -42,6 +43,7 @@ interface Booking {
 }
 
 export default function MyBookingsPage() {
+  const { confirm, dialog } = useConfirm()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -73,7 +75,7 @@ export default function MyBookingsPage() {
   }, [])
 
   const handleCancelBooking = async (id: string) => {
-    if (!confirm('Are you sure you want to cancel this reservation? This cannot be undone.')) return
+    if (!await confirm('Are you sure you want to cancel this reservation? This cannot be undone.')) return
     
     setActionLoading(id)
     try {
@@ -383,6 +385,7 @@ export default function MyBookingsPage() {
           </div>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

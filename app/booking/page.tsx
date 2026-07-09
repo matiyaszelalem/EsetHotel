@@ -36,7 +36,7 @@ export default async function BookingSearchPage({
   const bookedRoomIdsResult = await query<{ room_id: string }>(
     `SELECT DISTINCT br.room_id FROM booking_room br
      JOIN booking b ON b.id = br.booking_id
-     WHERE b.status NOT IN ('CANCELLED', 'NO_SHOW')
+     WHERE b.status NOT IN ('CANCELLED', 'NO_SHOW', 'CHECKED_OUT')
      AND b.check_in < $2
      AND b.check_out > $1`,
     [checkInDate.toISOString(), checkOutDate.toISOString()]
@@ -110,7 +110,7 @@ export default async function BookingSearchPage({
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h2 className="font-heading text-2xl font-semibold text-foreground">{room.name}</h2>
-                      <p className="text-muted-foreground mt-2 font-sans text-sm leading-relaxed max-w-[500px]">
+                      <p className="text-muted-foreground mt-2 font-sans text-sm leading-relaxed max-w-[500px] line-clamp-3">
                         {room.description}
                       </p>
                     </div>

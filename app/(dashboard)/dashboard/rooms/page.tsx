@@ -16,6 +16,7 @@ import {
   FolderOpen,
   Link2
 } from 'lucide-react'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface RoomType {
   id: string
@@ -38,6 +39,7 @@ interface Room {
 }
 
 export default function RoomsManagement() {
+  const { confirm, dialog } = useConfirm()
   const [activeTab, setActiveTab] = useState<'categories' | 'rooms'>('rooms')
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
@@ -237,7 +239,7 @@ export default function RoomsManagement() {
   }
 
   const handleDeleteCategory = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this room category? This cannot be undone.')) return
+    if (!await confirm('Are you sure you want to delete this room category? This cannot be undone.')) return
     try {
       const res = await fetch(`/api/dashboard/room-types?id=${id}`, {
         method: 'DELETE',
@@ -711,6 +713,7 @@ export default function RoomsManagement() {
           </div>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

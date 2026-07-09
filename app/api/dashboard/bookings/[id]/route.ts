@@ -7,9 +7,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const booking = await queryOne(
       `SELECT b.id, b.reference_id, b.guest_name, b.guest_email, b.guest_phone,
               b.check_in, b.check_out, b.status, b.total_price, b.payment_method,
-              b.source, b.special_requests, b.guest_count, b.created_at, b.checked_in_at, b.checked_out_at,
+              b.source, b.special_requests, b.guests, b.created_at,
               (SELECT row_to_json(p) FROM (SELECT id, amount, status, created_at FROM payment WHERE booking_id = b.id LIMIT 1) p) as payment
-       FROM booking b WHERE b.id = $1`, [id]
+        FROM booking b WHERE b.id::text = $1 OR b.reference_id = $1`, [id]
     )
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
@@ -23,7 +23,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
        FROM booking_room br
        JOIN room r ON r.id = br.room_id
        JOIN room_type rt ON rt.id = r.room_type_id
-       WHERE br.booking_id = $1`, [id]
+        WHERE br.booking_id::text = $1`, [id]
     )
 
     return NextResponse.json({
@@ -37,16 +37,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       checkOut: booking.check_out,
       paymentMethod: booking.payment_method,
       specialRequests: booking.special_requests,
-      guestCount: booking.guest_count,
-      checkedInAt: booking.checked_in_at,
-      checkedOutAt: booking.checked_out_at,
+      guestCount: booking.guests,
       createdAt: booking.created_at,
       rooms: rooms.map((r: any) => {
         const room = r.room
         return {
+          id: room.id,
+          pricePerNight: room.roomType ? parseFloat(room.roomType.basePrice) : 0,
           room: {
-            ...room,
-            pricePerNight: room.roomType ? parseFloat(room.roomType.basePrice) : 0,
+            roomNumber: room.roomNumber,
+            roomType: room.roomType,
           }
         }
       }),

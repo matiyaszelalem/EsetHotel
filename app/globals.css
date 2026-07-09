@@ -278,8 +278,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 ::view-transition-old(root) {
-  animation: 250ms cub
-ic-bezier(0.25, 0.1, 0.25, 1) both page-exit;
+  animation: 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both page-exit;
 }
 
 ::view-transition-new(root) {

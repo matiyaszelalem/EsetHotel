@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useParams } from 'next/navigation'
+import { useConfirm } from '@/hooks/use-confirm'
 import { 
   ArrowLeft, 
   Calendar, 
@@ -61,9 +62,10 @@ interface Booking {
   rooms: BookingRoom[]
 }
 
-export default function BookingDetail({ params }: { params: Promise<{ id: string }> }) {
+export default function BookingDetail() {
   const router = useRouter()
-  const { id } = use(params)
+  const { confirm, dialog } = useConfirm()
+  const { id } = useParams()
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -74,7 +76,10 @@ export default function BookingDetail({ params }: { params: Promise<{ id: string
     setError('')
     try {
       const res = await fetch(`/api/dashboard/bookings/${id}`)
-      if (!res.ok) throw new Error('Booking not found')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Booking not found')
+      }
       const data = await res.json()
       setBooking(data)
     } catch (err: any) {
@@ -196,8 +201,8 @@ export default function BookingDetail({ params }: { params: Promise<{ id: string
           {['CONFIRMED', 'PENDING'].includes(booking.status) && (
             <>
               <button
-                onClick={() => {
-                  if (confirm('Cancel this reservation? This cannot be undone.')) {
+                onClick={async () => {
+                  if (await confirm('Cancel this reservation? This cannot be undone.')) {
                     handleUpdateStatus('CANCELLED')
                   }
                 }}
@@ -207,8 +212,8 @@ export default function BookingDetail({ params }: { params: Promise<{ id: string
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  if (confirm('Mark as NO-SHOW? This will cancel the reservation and release the room.')) {
+                onClick={async () => {
+                  if (await confirm('Mark as NO-SHOW? This will cancel the reservation and release the room.')) {
                     handleUpdateStatus('NO_SHOW')
                   }
                 }}
@@ -411,6 +416,7 @@ export default function BookingDetail({ params }: { params: Promise<{ id: string
         </div>
 
       </div>
+      {dialog}
     </div>
   )
 }

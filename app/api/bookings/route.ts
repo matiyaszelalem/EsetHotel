@@ -20,11 +20,13 @@ export async function POST(req: Request) {
       guestEmail,
       guestPhone,
       specialRequests,
-      paymentMethod,
+      paymentMethod: rawPaymentMethod,
       promoCode,
       verificationMethod,
       verificationData
     } = body
+
+    const paymentMethod = rawPaymentMethod === 'hotel' ? 'PAY_AT_HOTEL' : rawPaymentMethod === 'stripe' ? 'PAY_AT_HOTEL' : rawPaymentMethod
 
     if (!roomSlug || !checkInStr || !checkOutStr || !guestName || !guestEmail) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -105,15 +107,16 @@ export async function POST(req: Request) {
 
     const assignedRoom = availableRooms[0]
 
-    let booking!: { id: string; reference_id: string }
+    let booking: { id: string; reference_id: string, guest_name: string, guest_email: string, check_in: string, check_out: string, total_price: number } | null = null
     for (let attempt = 1; attempt <= 3; attempt++) {
+      const refId = generateReferenceId()
       try {
         booking = await transaction(async (tx) => {
           const roomIds = [assignedRoom.id]
           const locked = await tx.query<{ id: string }>(
             `SELECT id FROM room
-             WHERE id = ANY($1::int[])
-               AND status = 'AVAILABLE'
+              WHERE id = ANY($1)
+                AND status = 'AVAILABLE'
              FOR UPDATE SKIP LOCKED`,
             [roomIds]
           )
@@ -161,15 +164,15 @@ export async function POST(req: Request) {
           const totalPrice = subtotal + taxes
 
           const b = await tx.queryOne<{
-            id: string; reference_id: string
+            id: string; reference_id: string; guest_name: string; guest_email: string; check_in: string; check_out: string; total_price: number
           }>(
             `INSERT INTO booking (reference_id, user_id, guest_name, guest_email, guest_phone,
               special_requests, check_in, check_out, guests, status, payment_method,
               total_price, promo_code_id, applied_tax_rate, source)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'DIRECT')
-             RETURNING id, reference_id`,
+             RETURNING id, reference_id, guest_name, guest_email, check_in, check_out, total_price`,
             [
-              generateReferenceId(),
+              refId,
               null,
               guestName,
               guestEmail,
@@ -178,8 +181,8 @@ export async function POST(req: Request) {
               checkIn.toISOString(),
               checkOut.toISOString(),
               guestCount,
-              paymentMethod === 'bank_transfer' ? 'PENDING' : paymentMethod === 'stripe' ? 'PENDING' : 'CONFIRMED',
-              paymentMethod === 'bank_transfer' ? 'BANK_TRANSFER' : paymentMethod === 'stripe' ? 'STRIPE' : 'PAY_AT_HOTEL',
+              paymentMethod === 'bank_transfer' ? 'PENDING' : 'CONFIRMED',
+              paymentMethod,
               totalPrice,
               appliedPromoId,
               taxRate,
@@ -192,7 +195,7 @@ export async function POST(req: Request) {
           )
 
           await tx.execute(
-            "UPDATE room SET status = 'BOOKED' WHERE id = $1",
+            "UPDATE room SET status = 'RESERVED' WHERE id = $1",
             [assignedRoom.id]
           )
 
@@ -210,12 +213,24 @@ export async function POST(req: Request) {
       }
     }
 
+    if (!booking) {
+      return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 })
+    }
+
     try {
       const { sendBookingConfirmationEmail } = await import('@/lib/email')
       const { channelManager } = await import('@/lib/channel-manager/manager')
       const { createNotification } = await import('@/lib/notifications')
 
-      void sendBookingConfirmationEmail(booking)
+      const emailData = {
+        referenceId: booking.reference_id,
+        guestName: booking.guest_name,
+        guestEmail: booking.guest_email,
+        checkIn: booking.check_in,
+        checkOut: booking.check_out,
+        totalPrice: booking.total_price,
+      }
+      void sendBookingConfirmationEmail(emailData)
       await channelManager.pushAvailabilityToAll()
       await createNotification(
         'BOOKING_NEW',

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Trash2, AlertCircle, Loader2, Star, CheckCircle, XCircle } from 'lucide-react'
+import { useConfirm } from '@/hooks/use-confirm'
 
 interface Testimonial {
   id: string
@@ -13,6 +14,7 @@ interface Testimonial {
 }
 
 export default function TestimonialsManagement() {
+  const { confirm, dialog } = useConfirm()
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -99,7 +101,7 @@ export default function TestimonialsManagement() {
   }
 
   const handleDeleteTestimonial = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this testimonial?')) return
+    if (!await confirm('Are you sure you want to delete this testimonial?')) return
     try {
       const res = await fetch(`/api/dashboard/content/testimonials?id=${id}`, {
         method: 'DELETE',
@@ -283,6 +285,7 @@ export default function TestimonialsManagement() {
           </div>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

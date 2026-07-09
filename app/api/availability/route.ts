@@ -61,21 +61,10 @@ export async function GET(request: Request) {
       'SELECT id, room_number, room_type_id, status FROM room'
     )
 
-    const overlappingBookings = await query<{
-      id: string
-    }>(
-      `SELECT DISTINCT b.id FROM booking b
-       JOIN booking_room br ON br.booking_id = b.id
-       WHERE b.status NOT IN ('CANCELLED', 'NO_SHOW')
-       AND b.check_in < $2
-       AND b.check_out > $1`,
-      [checkInDate.toISOString(), checkOutDate.toISOString()]
-    )
-
     const bookedRoomIdsResult = await query<{ room_id: string }>(
       `SELECT DISTINCT br.room_id FROM booking_room br
        JOIN booking b ON b.id = br.booking_id
-       WHERE b.status NOT IN ('CANCELLED', 'NO_SHOW')
+       WHERE b.status NOT IN ('CANCELLED', 'NO_SHOW', 'CHECKED_OUT')
        AND b.check_in < $2
        AND b.check_out > $1`,
       [checkInDate.toISOString(), checkOutDate.toISOString()]

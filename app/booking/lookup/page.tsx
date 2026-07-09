@@ -211,7 +211,7 @@ export default function BookingLookupPage() {
                     <div className="flex justify-between text-sm text-muted-foreground mt-1">
                       <span>Method</span>
                       <span className="font-medium text-foreground">
-                        {booking.paymentMethod === 'STRIPE' ? 'Online (Stripe)' : 'Pay at Hotel'}
+                        {booking.paymentMethod === 'stripe' ? 'Online (Stripe)' : 'Pay at Hotel'}
                       </span>
                     </div>
                   </div>

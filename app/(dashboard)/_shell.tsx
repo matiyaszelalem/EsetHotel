@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
   LayoutDashboard, 
@@ -55,6 +55,7 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState(user)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     fetch('/api/account/profile')
@@ -141,6 +142,14 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
       setUnreadCount(prev => Math.max(0, prev - 1))
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
     } catch {}
+  }
+
+  const handleNotificationClick = (n: any) => {
+    if (!n.isRead) markOneRead(n.id)
+    setShowNotifications(false)
+    if (n.referenceId && ['BOOKING_NEW', 'BOOKING_CHECK_IN', 'BOOKING_CHECK_OUT', 'BOOKING_CANCELLED', 'PAYMENT_RECEIVED', 'PAYMENT_VERIFIED', 'PAYMENT_REJECTED'].includes(n.type)) {
+      router.push(`/dashboard/bookings/${n.referenceId}`)
+    }
   }
 
   const getNotificationIcon = (type: string) => {
@@ -352,7 +361,7 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
                           return (
                             <div
                               key={n.id}
-                              onClick={() => !n.isRead && markOneRead(n.id)}
+                              onClick={() => handleNotificationClick(n)}
                               className={`flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer border-b border-border last:border-0 ${
                                 !n.isRead ? 'bg-primary/5' : ''
                               }`}

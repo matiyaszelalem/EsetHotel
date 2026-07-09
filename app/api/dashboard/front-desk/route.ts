@@ -11,7 +11,7 @@ export async function GET() {
               p.id as payment_id, p.verification_method, p.verification_data, p.amount
        FROM booking b
        JOIN payment p ON p.booking_id = b.id
-       WHERE b.payment_method = 'BANK_TRANSFER'
+       WHERE b.payment_method = 'bank_transfer'
          AND p.status = 'PENDING'
          AND b.status IN ('PENDING', 'CONFIRMED')
        ORDER BY b.created_at DESC`
